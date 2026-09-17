@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Reveal } from "@/components/Reveal";
 import { DocSection } from "@/components/DocSection";
+import { Snippet } from "@/components/Snippet";
 import { TOOL_DETAILS, TOOL_GROUPS, VERSION_NOTE } from "@/lib/content";
 
 export const metadata: Metadata = {
@@ -14,7 +15,7 @@ export default function Tools() {
       <Reveal className="max-w-[68ch]">
         <h1 className="display mb-0 text-[clamp(28px,4.4vw,56px)]">Call the tools.</h1>
         <p className="lead mt-6 max-w-[56ch]">
-          Thirteen tools, Protocol 4. Amounts are decimal strings, <code>memo_hash</code> is hex.
+          Thirteen tools, Protocol 5. Amounts are decimal strings, <code>memo_hash</code> is hex.
         </p>
       </Reveal>
 
@@ -51,6 +52,41 @@ export default function Tools() {
             concepts.
           </p>
           <p className="prose mt-4 max-w-[62ch]">{VERSION_NOTE}</p>
+        </DocSection>
+
+        <DocSection id="examples" n="02" title="Request and response, per tool">
+          <p className="prose max-w-[62ch]">
+            Every envelope is <code>{"{ok, backend, network, result | error}"}</code>. A write
+            also carries back the <code>operation_id</code> it was called with.{" "}
+            <code>{'{"...": "..."}'}</code> marks a value elided for length, not a real field
+            name.
+          </p>
+          <div className="mt-8 space-y-10 border-t border-rule pt-8">
+            {TOOL_GROUPS.flatMap((g) => g.tools).map((t) => {
+              const d = TOOL_DETAILS[t];
+              if (!d) return null;
+              return (
+                <div key={t}>
+                  <p className="mono-sm mb-3 text-fore">{t}</p>
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <div>
+                      <p className="mono-xs mb-2 uppercase tracking-[0.14em] text-fore-3">
+                        Request
+                      </p>
+                      <Snippet command={d.request} label={`${t}-request`} accent />
+                    </div>
+                    <div>
+                      <p className="mono-xs mb-2 uppercase tracking-[0.14em] text-fore-3">
+                        Response
+                      </p>
+                      <Snippet command={d.response} label={`${t}-response`} />
+                    </div>
+                  </div>
+                  {d.detail ? <p className="prose mt-3 max-w-[62ch] text-fore-3">{d.detail}</p> : null}
+                </div>
+              );
+            })}
+          </div>
         </DocSection>
       </div>
     </>

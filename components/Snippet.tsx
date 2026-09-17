@@ -19,10 +19,10 @@ export function Snippet({
   label: string;
   /** Ember border and glow, for the one command that shouldn't blend in. */
   highlight?: boolean;
-  /** A quiet ember rule on the left edge only, for the one command that
-   *  matters most on a reference page — without the full install-card
-   *  treatment, which is reserved for the single most load-bearing command
-   *  on the whole site. */
+  /** A quiet ember rule on the left edge only, marking what you'd actually
+   *  type or send — a request, a command — without the full install-card
+   *  treatment, which stays reserved for the single most load-bearing
+   *  command on the whole site. */
   accent?: boolean;
 }) {
   const [copied, setCopied] = useState(false);

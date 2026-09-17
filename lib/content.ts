@@ -231,44 +231,145 @@ export const CONCEPTS = [
 
 /* ── The tool surface, in full · docs/reference.md §The MCP tool surface ─── */
 
-export const TOOL_DETAILS: Record<string, { signature: string; note: string }> = {
-  open_channel: { signature: "(operation_id, counterparty)", note: "Returns channel_handle." },
+export const TOOL_DETAILS: Record<
+  string,
+  { signature: string; note: string; request: string; response: string; detail?: string }
+> = {
+  open_channel: {
+    signature: "(operation_id, counterparty)",
+    note: "Returns channel_handle.",
+    request: `{"operation_id": "op_3f9a...c02e", "counterparty": "0x04a1...9bd2"}`,
+    response: `{"ok": true, "backend": "seam", "network": "sepolia",
+ "result": {"channel_handle": "ch_9f8106a8...29c6d12ac"},
+ "operation_id": "op_3f9a...c02e"}`,
+  },
   propose_offer: {
     signature: "(operation_id, channel_handle, amount, token, deadline, memo_hash)",
     note: "The payee asks. The payer offers.",
+    request: `{"operation_id": "op_1b7e...44aa", "channel_handle": "ch_9f8106a8...29c6d12ac",
+ "amount": "800000000000000000", "token": "0x0471...11ee",
+ "deadline": 1768003600, "memo_hash": "0x9f2c...ab01"}`,
+    response: `{"ok": true, "backend": "seam", "network": "sepolia",
+ "result": {"offer_id": "ch_9f8106a8...29c6d12ac:us:0"},
+ "operation_id": "op_1b7e...44aa"}`,
   },
   counter_offer: {
     signature: "(operation_id, channel_handle, reply_to, amount, token, deadline, memo_hash)",
     note: "Does not withdraw the offer it replies to.",
+    request: `{"operation_id": "op_5a11...09dc", "channel_handle": "ch_9f8106a8...29c6d12ac",
+ "reply_to": "ch_9f8106a8...29c6d12ac:us:0", "amount": "600000000000000000",
+ "token": "0x0471...11ee", "deadline": 1768003600, "memo_hash": "0x9f2c...ab01"}`,
+    response: `{"ok": true, "backend": "seam", "network": "sepolia",
+ "result": {"offer_id": "ch_9f8106a8...29c6d12ac:them:0"},
+ "operation_id": "op_5a11...09dc"}`,
   },
   wait_for_offers: {
     signature: "(channel_handle, expected_count, timeout_seconds=300)",
     note: "One call instead of a poll loop. A timeout is not an error.",
+    request: `{"channel_handle": "ch_9f8106a8...29c6d12ac", "expected_count": 1, "timeout_seconds": 300}`,
+    response: `{"ok": true, "backend": "seam", "network": "sepolia",
+ "result": {
+   "offers": [{"offer_id": "ch_9f8106a8...29c6d12ac:us:0", "deal_id": "319440722280485962",
+     "proposer": "0x04a1...9bd2", "status": "proposed", "reply_to": null,
+     "created_at": 1768000012,
+     "terms": {"amount": "800000000000000000", "token": "0x0471...11ee",
+       "deadline": 1768003600, "memo_hash": "0x9f2cab01..."}}],
+   "settlements": [], "timed_out": false}}`,
   },
   read_channel_state: {
     signature: "(channel_handle)",
     note: "Every visible offer plus the settlement list.",
+    request: `{"channel_handle": "ch_9f8106a8...29c6d12ac"}`,
+    response: `{"ok": true, "backend": "seam", "network": "sepolia",
+ "result": {"offers": [{"...": "same offer shape as wait_for_offers"}],
+   "settlements": [{"acceptance": "ch_9f8106a8...29c6d12ac:them:0", "accepted_offer": "ch_9f8106a8...29c6d12ac:us:0",
+     "agreed_amount": "600000000000000000", "paid_amount": "600000000000000000",
+     "consistency": "consistent"}]}}`,
   },
   accept_and_settle: {
     signature: "(operation_id, channel_handle, offer_id)",
     note: "Payer only. Settles one deal. The pair can start another.",
+    request: `{"operation_id": "op_c810...6f3e", "channel_handle": "ch_9f8106a8...29c6d12ac",
+ "offer_id": "ch_9f8106a8...29c6d12ac:them:0"}`,
+    response: `{"ok": true, "backend": "seam", "network": "sepolia",
+ "result": {"offer_id": "ch_9f8106a8...29c6d12ac:them:0", "tx_hash": "0x79167f21...f97a",
+   "nullifiers": ["0x2c11...", "0x88a0..."], "proved_at": 1768000042,
+   "selected_input": "800000000000000000", "change": "200000000000000000"},
+ "operation_id": "op_c810...6f3e"}`,
   },
-  get_note_balance: { signature: "()", note: "Payer must call before naming a price." },
+  get_note_balance: {
+    signature: "()",
+    note: "Payer must call before naming a price.",
+    request: `{}`,
+    response: `{"ok": true, "backend": "seam", "network": "sepolia",
+ "result": {"spendable_notes": ["500000000000000000", "300000000000000000"],
+   "total": "800000000000000000", "pending_notes": []}}`,
+  },
   grant_viewing_key: {
     signature: "(operation_id, channel_handle, deal_id, grantee, expires_at, output_path)",
     note: "Writes a new mode-0600 file and returns no secret.",
+    request: `{"operation_id": "op_e922...10ab", "channel_handle": "ch_9f8106a8...29c6d12ac",
+ "deal_id": "319440722280485962", "grantee": "0x0763...c94f",
+ "expires_at": 1769990000, "output_path": "~/.erebus-c/grants/deal.json"}`,
+    response: `{"ok": true, "backend": "seam", "network": "sepolia",
+ "result": {"channel_id": "ch_9f8106a8...29c6d12ac", "deal_id": "319440722280485962",
+   "grantee": "0x0763...c94f", "expires_at": 1769990000,
+   "grant_path": "/home/you/.erebus-c/grants/deal.json"}}`,
   },
-  reveal: { signature: "(grant_path)", note: "Reconstructs the selected deal." },
-  reconcile: { signature: "()", note: "Read-only. Classifies journaled operations, never submits." },
+  reveal: {
+    signature: "(grant_path)",
+    note: "Reconstructs the selected deal.",
+    request: `{"grant_path": "/home/you/.erebus-c/grants/deal.json"}`,
+    response: `{"ok": true, "backend": "seam", "network": "sepolia",
+ "result": {"channel_id": "ch_9f8106a8...29c6d12ac", "participants": ["0x04a1...9bd2", "0x0763...c94f"],
+   "offers": [{"...": "same offer shape as wait_for_offers, this deal only"}],
+   "settlement": {"acceptance": "ch_9f8106a8...29c6d12ac:them:0", "accepted_offer": "ch_9f8106a8...29c6d12ac:us:0",
+     "agreed_amount": "600000000000000000", "paid_amount": "600000000000000000",
+     "consistency": "consistent"}}}`,
+  },
+  reconcile: {
+    signature: "()",
+    note: "Read-only. Classifies journaled operations, never submits.",
+    request: `{}`,
+    response: `{"ok": true, "backend": "seam", "network": "sepolia",
+ "result": [{"operation_id": "op_c810...6f3e", "operation": "accept_and_settle",
+   "request": {"...": "the canonical replay request recorded before execution"},
+   "stage": "submitted", "channel": "ch_9f8106a8...29c6d12ac",
+   "transaction_hash": "0x79167f21...f97a", "accepted_at": null,
+   "outcome": "pending", "next_action": "wait",
+   "reason": "submitted but acceptance not yet confirmed on chain"}]}`,
+  },
   resume_operation: {
     signature: "(operation_id)",
     note: "Resumes one safe operation, or names the operator action it needs first.",
+    request: `{"operation_id": "op_c810...6f3e"}`,
+    response: `{"ok": true, "backend": "seam", "network": "sepolia",
+ "result": {"result": "already_complete", "transaction_hash": "0x79167f21...f97a"}}`,
+    detail:
+      "Shown: the already_complete case. The inner \"result\" field (yes, nested under the envelope's own \"result\") is one of already_complete, local_state_behind, resubmitted, recovered_proof, rebuilt, rebuild_required, or reconciliation_required — each carries different fields alongside it, e.g. rebuild_required carries a \"reason\" string instead of a transaction_hash.",
   },
   rebuild_state: {
     signature: "()",
     note: "Rebuilds missing channel records from the pool key and chain data.",
+    request: `{}`,
+    response: `{"ok": true, "backend": "seam", "network": "sepolia",
+ "result": {"channels_found": 3, "rebuilt": ["ch_9f8106a8...29c6d12ac"],
+   "kept": 2, "other_token": 0, "unrecoverable": 0}}`,
   },
-  doctor: { signature: "()", note: "Read-only. Always safe to call." },
+  doctor: {
+    signature: "()",
+    note: "Read-only. Always safe to call.",
+    request: `{}`,
+    response: `{"ok": true, "backend": "seam", "network": "sepolia",
+ "result": {"ready": true,
+   "checks": [
+     {"name": "rpc", "status": "pass", "detail": "reachable, head is block 14200931"},
+     {"name": "prover", "status": "pass", "detail": "reachable, spec 0.14.2"},
+     {"name": "allowance", "status": "pass", "detail": "3 writes funded"},
+     {"...": "pool_key_file, account_key_file, state_dir, chain_id, pool, registration, gas_balance also run"}
+   ],
+   "repairs": []}}`,
+  },
 };
 
 /* ── Responses and errors · docs/reference.md §Errors and retries ────────── */
@@ -609,6 +710,10 @@ export const PAGE_SECTIONS: Record<string, { id: string; label: string }[]> = {
     { id: "cli", label: "The CLI protocol" },
     { id: "build", label: "Build from source" },
     { id: "source", label: "Read the source of truth" },
+  ],
+  "/tools": [
+    { id: "tools", label: "The tool surface" },
+    { id: "examples", label: "Request and response, per tool" },
   ],
 };
 
