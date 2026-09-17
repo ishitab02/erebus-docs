@@ -142,7 +142,7 @@ export const NON_CLAIMS: NonClaim[] = [
   },
 ];
 
-/* ── The tool surface · thirteen MCP tools, Protocol 4 ──────────────────── */
+/* ── The tool surface · thirteen MCP tools, Protocol 5 ──────────────────── */
 
 export const TOOL_GROUPS = [
   {
@@ -325,13 +325,13 @@ export const ERROR_GROUPS = [
 /* ── Version · docs/reference.md, docs/status.md ─────────────────────────── */
 
 export const VERSION_NOTE =
-  "This page documents CLI Protocol 4, published as v0.2.0, exposing the thirteen tools listed above. The older v0.1.0 speaks Protocol 2 and exposes ten. erebus-sdk refuses a mismatched CLI by protocol number rather than failing later on a changed shape.";
+  "This page documents CLI Protocol 5, published as v0.3.0, exposing the thirteen tools listed above. Protocol 5 adds installed account onboarding (erebus-init); settlement requests retain Protocol 4's operation_id mechanics unchanged. The older v0.2.0 speaks Protocol 4, and v0.1.0 speaks Protocol 2 and exposes ten. erebus-sdk refuses a mismatched CLI by protocol number rather than failing later on a changed shape.";
 
-export const VERSION_BADGE = "Protocol 4 · v0.2.0";
+export const VERSION_BADGE = "Protocol 5 · v0.3.0";
 
-/* ── Set up an identity · docs/reference.md §Set up an identity ──────────── */
+/* ── Set up an identity · docs/onboarding.md ──────────────────────────────── */
 
-export const IDENTITY_BOOTSTRAP = `scripts/new-identity.sh bootstrap erebus-a ~/.erebus-a <funder-account>`;
+export const IDENTITY_BOOTSTRAP = `erebus-init`;
 
 export const IDENTITY_KEYS = [
   {
@@ -635,7 +635,7 @@ const KEYWORD_INDEX = [
   {
     title: "Set up an identity",
     href: "/#identity",
-    snippet: "new-identity.sh bootstrap, pool key, account key, auditor key",
+    snippet: "erebus-init, pool key, account key, auditor key",
   },
   {
     title: "Configure an identity",

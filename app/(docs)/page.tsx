@@ -43,19 +43,21 @@ export default function Docs() {
         <DocSection id="identity" n="02" title="Set up an identity">
           <p className="prose max-w-[62ch]">
             An identity is a Starknet account plus two key files, registered with the pool and
-            holding shielded notes. Six on-chain steps get you there, and one script does all of
-            them:
+            holding shielded notes. One command walks through it:
           </p>
           <div className="mt-5">
-            <Snippet command={IDENTITY_BOOTSTRAP} label="bootstrap" accent />
+            <Snippet command={IDENTITY_BOOTSTRAP} label="init" accent />
           </div>
           <p className="prose mt-5 max-w-[62ch]">
-            That creates the account, funds it, deploys it, generates the pool key and extracts
-            the account key, approves the pool for the live per-write fee, then shields 1 STRK,
-            which also registers the identity, and runs <code>doctor</code>. It exits non-zero if{" "}
-            <code>doctor</code> is not ready. Without a funded account to pay from, use the faucet
-            flow instead: <code>create</code>, fund the printed address by hand, then{" "}
-            <code>activate</code>. Both are documented in the script&rsquo;s header.
+            Select an existing account or type <code>new</code>. It prints the address and
+            funding shortfall; send STRK to that address, then confirm. Setup deploys a new
+            account when necessary, approves the allowance, waits for proving depth, shields
+            the chosen deposit, and runs <code>doctor</code>. If it times out or you close it,
+            continue with the printed <code>--resume</code> command; the selected address,
+            keys, and operation IDs survive the restart. For agents, <code>--list-accounts
+            --json</code>, <code>--account &lt;id&gt;</code>, <code>--new</code>, and{" "}
+            <code>--resume</code> make the choice explicit, and <code>--yes</code> authorizes
+            the setup transactions.
           </p>
           <p className="prose mt-4 max-w-[62ch]">
             <strong>Registration is irreversible</strong> and writes the identity&rsquo;s pool
