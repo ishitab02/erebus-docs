@@ -1,0 +1,8 @@
+# Standalone package: the docs site is not part of any monorepo workspace.
+# `allowBuilds` is pnpm 11's home for build-script approvals; without it the
+# install exits non-zero on the ignored postinstall scripts below.
+packages:
+  - "."
+allowBuilds:
+  "@tailwindcss/oxide": true
+  sharp: true
