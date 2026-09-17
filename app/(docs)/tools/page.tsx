@@ -61,6 +61,15 @@ export default function Tools() {
             <code>{'{"...": "..."}'}</code> marks a value elided for length, not a real field
             name.
           </p>
+          <p className="prose mt-4 max-w-[62ch]">
+            An <code>offer_id</code> reads as{" "}
+            <code>{"<channel>:us:<n>"}</code> or <code>{"<channel>:them:<n>"}</code>, and the{" "}
+            <code>us</code> and <code>them</code> are relative to whoever is calling. The same
+            offer is <code>us:0</code> to the side that made it and <code>them:0</code> to the
+            side that received it, so an id copied from one agent&rsquo;s transcript into the
+            other&rsquo;s call will not resolve. Except where noted, these examples are one
+            payer&rsquo;s session.
+          </p>
           <div className="mt-8 space-y-10 border-t border-rule pt-8">
             {TOOL_GROUPS.flatMap((g) => g.tools).map((t) => {
               const d = TOOL_DETAILS[t];
