@@ -611,9 +611,25 @@ export const PAGE_SECTIONS: Record<string, { id: string; label: string }[]> = {
   ],
 };
 
-/* ── Docs search index · titles and snippets a reader would actually type ── */
+/* ── Docs search index ──────────────────────────────────────────────────────
+   Every visible heading must be findable by its own text, so this is built
+   from DOCS_PAGES and PAGE_SECTIONS rather than hand-copied: a heading
+   changed in one place used to silently go unsearchable (e.g. "Infrastructure
+   sees more" was indexed under a different title and "infrastructure" as a
+   search term returned nothing). KEYWORD_INDEX below stays hand-written for
+   content terms that aren't headings (env vars, tool names, commands). ──── */
 
-export const SEARCH_INDEX = [
+const HEADING_INDEX = DOCS_PAGES.flatMap((p) => {
+  const sections = PAGE_SECTIONS[p.href];
+  if (!sections) return [{ title: p.label, href: p.href, snippet: p.label }];
+  return sections.map((s) => ({
+    title: s.label,
+    href: `${p.href}#${s.id}`,
+    snippet: p.label,
+  }));
+});
+
+const KEYWORD_INDEX = [
   { title: "Install", href: "/#install", snippet: "uv tool install erebus-mcp-server" },
   {
     title: "Set up an identity",
@@ -736,3 +752,5 @@ export const SEARCH_INDEX = [
     snippet: "runbook.md, reference.md, ARCHITECTURE.md, status.md",
   },
 ] as const;
+
+export const SEARCH_INDEX = [...HEADING_INDEX, ...KEYWORD_INDEX] as const;
