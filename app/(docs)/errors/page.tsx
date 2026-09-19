@@ -15,7 +15,7 @@ export default function Errors() {
       <Reveal className="max-w-[68ch]">
         <h1 className="display mb-0 text-[clamp(28px,4.4vw,56px)]">Responses and errors.</h1>
         <p className="lead mt-6 max-w-[56ch]">
-          One envelope shape, success or failure. Branch on the group, not the code.
+          Defines response formatting, error categories, and retry handling.
         </p>
       </Reveal>
 

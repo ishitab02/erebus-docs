@@ -24,9 +24,9 @@ export default function Docs() {
           Get started.
         </h1>
         <p className="lead mt-8 max-w-[56ch]">
-          Erebus runs as an MCP server. Install it, give it an identity, and any
-          client that can set environment can drive a negotiation and a shielded
-          settlement.
+          Erebus runs as an MCP server. Install it, give it an identity, and configure
+          environment variables to drive a private negotiation and shielded settlement
+          from any supported client.
         </p>
       </Reveal>
 

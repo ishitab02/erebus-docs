@@ -16,8 +16,8 @@ export default function Limits() {
       <Reveal className="max-w-[68ch]">
         <h1 className="display mb-0 text-[clamp(28px,4.4vw,56px)]">Limits.</h1>
         <p className="lead mt-6 max-w-[56ch]">
-          Erebus v0.2.0 is a published, mainnet-verified technical preview. It is not ready for
-          material real value, and this page is specific about why.
+          Outlines protocol design boundaries, unfinished features, and production safety
+          constraints.
         </p>
       </Reveal>
 

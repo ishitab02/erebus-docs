@@ -26,8 +26,7 @@ export default function Privacy() {
       <Reveal className="max-w-[68ch]">
         <h1 className="display mb-0 text-[clamp(28px,4.4vw,56px)]">Privacy model.</h1>
         <p className="lead mt-6 max-w-[56ch]">
-          What is actually hidden, what is not, and where the edges are. Read this before you
-          decide whether Erebus fits your threat model.
+          Documents what is actually hidden, what is not, and where the edges are.
         </p>
       </Reveal>
 

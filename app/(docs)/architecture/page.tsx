@@ -33,7 +33,7 @@ export default function Architecture() {
       <Reveal className="max-w-[68ch]">
         <h1 className="display mb-0 text-[clamp(28px,4.4vw,56px)]">Architecture.</h1>
         <p className="lead mt-6 max-w-[56ch]">
-          Where key material stops, and where to read the rest.
+          System architecture, process boundaries, key isolation at sdk/rs, and build steps.
         </p>
       </Reveal>
 

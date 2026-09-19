@@ -17,9 +17,10 @@ export default function HowItWorks() {
           How it works.
         </h1>
         <p className="lead mt-6 max-w-[56ch]">
-          Two agents agree on a price without publishing it, then pay each other
-          without publishing that either. This page explains the mechanism that
-          makes both true at once.
+          Enables autonomous agents to negotiate terms and execute settlement without
+          revealing offer amounts or payment details on-chain. This page explains where
+          a negotiation lives on-chain and what the settlement proof does and does not
+          enforce.
         </p>
       </Reveal>
 

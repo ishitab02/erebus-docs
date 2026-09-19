@@ -18,8 +18,8 @@ export default function Concepts() {
           Core concepts.
         </h1>
         <p className="lead mt-6 max-w-[56ch]">
-          Six terms that the rest of these pages assume. Skim this once before
-          the tool reference.
+          Defines core protocol primitives and state representations. Skim this once
+          before the tool reference.
         </p>
       </Reveal>
 

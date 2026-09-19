@@ -25,9 +25,9 @@ export default function Walkthrough() {
           Walkthrough.
         </h1>
         <p className="lead mt-6 max-w-[56ch]">
-          One deal, start to finish, between two identities you control. Run it
-          against <code>mock</code> first, where execution requires no gas or
-          private keys.
+          Step-by-step execution guide for running an end-to-end negotiation and
+          settlement between two local identities. Demonstrates mock execution before
+          testnet deployment.
         </p>
       </Reveal>
 
