@@ -13,24 +13,28 @@ export default function HowItWorks() {
   return (
     <>
       <Reveal className="max-w-[68ch]">
-        <h1 className="display mb-0 text-[clamp(28px,4.4vw,56px)]">How it works.</h1>
+        <h1 className="display mb-0 text-[clamp(28px,4.4vw,56px)]">
+          How it works.
+        </h1>
         <p className="lead mt-6 max-w-[56ch]">
-          Two agents agree on a price without publishing it, then pay each other without
-          publishing that either. This page explains the mechanism that makes both true at once.
+          Two agents agree on a price without publishing it, then pay each other
+          without publishing that either. This page explains the mechanism that
+          makes both true at once.
         </p>
       </Reveal>
 
       <div className="mt-16 md:mt-20">
         <DocSection id="shape" n="01" title="The shape of the problem">
           <p className="prose max-w-[62ch]">
-            A negotiation between two agents is a sequence of structured messages: an offer, a
-            counter, an acceptance. Settlement is a payment. Doing either one privately is a
-            solved problem on its own. Doing both, and binding them together so that the payment
-            provably corresponds to the thing that was agreed, is the part that needs design.
+            An agent negotiation follows a structured message sequence: offer,
+            counteroffer and acceptance, followed by settlement. Executing
+            either phase privately is an established pattern on its own. The
+            core protocol challenge is binding the two together, so the payment
+            provably reflects the terms that were agreed.
           </p>
           <p className="prose mt-4 max-w-[62ch]">
-            Three cryptographic jobs are involved, and conflating them is the usual mistake. Only
-            the third one requires a zero-knowledge proof.
+            This workflow requires three distinct cryptographic tasks. Only the
+            third requires a zero-knowledge proof.
           </p>
           <dl className="mt-6 border-t border-rule">
             {CRYPTO_JOBS.map((j) => (
@@ -45,21 +49,27 @@ export default function HowItWorks() {
             ))}
           </dl>
           <p className="prose mt-6 max-w-[62ch]">
-            Erebus owns the first two. The third belongs to the STRK20 privacy pool, which already
-            exists and is already audited. That division is why there is no Erebus contract
-            deployed anywhere: the negotiation rides inside a structure the pool already provides.
+            Erebus owns the first two tasks. The third is delegated to the
+            existing, audited STRK20 privacy pool. Since negotiations run
+            entirely within data structures that the pool already provides,
+            Erebus does not require dedicated smart contract deployments.
           </p>
         </DocSection>
 
         <DocSection id="salts" n="02" title="Where a negotiation lives">
           <p className="prose max-w-[62ch]">
-            A pool note has no payload field. What it does have is a salt, a client-written value
-            the contract accepts anywhere in the range <code>2 &le; salt &lt; 2^120</code> and
-            stores in the high bits of the note. Nothing in the pool cares what that number means.
-            Erebus puts a negotiation message there.
+            Pool notes lack a dedicated payload field, but the contract accepts
+            a client-written salt anywhere in the range{" "}
+            <code>
+              2 &le; salt &lt; 2<sup>120</sup>
+            </code>{" "}
+            and stores it in the note&rsquo;s high bits. Since the contract
+            never interprets this number, Erebus uses this space to store
+            negotiation messages directly.
           </p>
           <p className="prose mt-4 max-w-[62ch]">
-            One message is 400 bits of plaintext, laid out most-significant-first:
+            Each message consists of a 400-bit plaintext payload, formatted in
+            most-significant-bit (MSB) order:
           </p>
           <dl className="mt-5 border-t border-rule">
             {WIRE_FIELDS.map((f) => (
@@ -74,26 +84,30 @@ export default function HowItWorks() {
             ))}
           </dl>
           <p className="prose mt-6 max-w-[62ch]">
-            That plaintext is encrypted with AES-256-GCM-SIV before it goes anywhere. The current
-            wire prepends a 64-bit deal id, which lets one channel carry more than one deal, and
-            the resulting ciphertext and authentication tag are split across the salts of five
-            notes. Each note carries 119 usable payload bits, so five notes give 595 bits to work
-            with. A derived keystream masks the few bits left over, so the spare space does not
-            form a recognizable pattern.
+            The plaintext is encrypted with AES-256-GCM-SIV prior to
+            transmission. The current wire prepends a 64-bit deal id so one
+            channel can carry more than one deal, then splits the resulting
+            ciphertext and authentication tag across the salts of five notes.
+            Each note carries 119 usable payload bits, so five notes yield 595
+            bits total. A derived keystream masks any spare bits to eliminate
+            predictable structural patterns.
           </p>
           <p className="prose mt-4 max-w-[62ch]">
-            Salts are public. Every byte of that ciphertext is readable by anyone. The
-            confidentiality comes entirely from the encryption, not from the storage location,
-            which is the correct way around: an observer can see that five notes were written and
-            cannot tell an offer of 1 STRK from an offer of 500.
+            Because note salts are public on-chain, confidentiality relies
+            entirely on the encryption payload rather than on storage privacy.
+            An observer can verify that five notes were generated without being
+            able to distinguish between different offer values. An offer of 1
+            STRK and an offer of 500 STRK look identical on-chain.
           </p>
           <p className="prose mt-4 max-w-[62ch]">
-            One constraint falls out of this and it is not optional. Structured salts are valid
-            only on <strong>zero-amount notes</strong>. A note that carries value needs a random
-            salt, because there the salt is the one-time-pad nonce for the encrypted amount.
-            Reusing a mask across two different amounts would let an observer subtract the
-            ciphertexts and recover the difference. Zero-amount notes carry no amount to leak, so
-            they are safe to write structure into.
+            This design introduces one mandatory constraint: structured salts
+            are restricted strictly to <strong>zero-amount notes</strong>. Notes
+            carrying actual token amounts require random salts to serve as
+            one-time pad nonces. Reusing a non-random mask on value-bearing
+            notes enables an observer to subtract ciphertexts and recover the
+            exact delta between amounts. Zero-amount notes carry no balance
+            information, so embedding structured payloads within their salt
+            field introduces no privacy risk.
           </p>
         </DocSection>
 
@@ -122,7 +136,9 @@ export default function HowItWorks() {
               ],
             ].map(([title, body], i) => (
               <li key={title} className="grid grid-cols-[2.5rem_1fr] gap-x-5">
-                <span className="mono-xs pt-1 text-fore-3">{String(i).padStart(2, "0")}</span>
+                <span className="mono-xs pt-1 text-fore-3">
+                  {String(i).padStart(2, "0")}
+                </span>
                 <div>
                   <p className="mono-sm m-0 text-fore">{title}</p>
                   <p className="prose mt-2 max-w-[58ch]">{body}</p>
@@ -131,58 +147,68 @@ export default function HowItWorks() {
             ))}
           </ol>
           <p className="prose mt-8 max-w-[62ch]">
-            Every one of those writes follows the same path, and there is no faster one. The pool
-            is an account contract, so the client simulates the action set locally, sends it for
-            proving, and submits the resulting proof through <code>apply_actions</code>. A code
-            path that skips proof generation is not an optimization, it is a bug.
+            All transaction writes follow the same path. The client must
+            simulate the action set locally, generate a proof, and submit it via{" "}
+            <code>apply_actions</code>. Proof generation is mandatory and cannot
+            be bypassed.
           </p>
         </DocSection>
 
         <DocSection id="settle" n="04" title="What settlement enforces">
           <p className="prose max-w-[62ch]">
-            Settlement is one action set, and the chain either applies all of it or none of it.
-            The acceptance and the payment cannot come apart: there is no window in which one
-            agent is committed and the other is not, because there is only one state transition.
+            Settlement executes as a single action set on-chain, ensuring that
+            acceptance and payment occur simultaneously within a single state
+            transition. This eliminates any window where one party is committed
+            while the other is not.
           </p>
           <p className="prose mt-4 max-w-[62ch]">
-            Be precise about what that atomicity buys, because it is narrower than it sounds. The
-            pool&rsquo;s proof enforces the things the pool understands: that the spent notes
-            exist, that the spender controls them, that inputs equal outputs plus fees, that no
-            note is spent twice. Those are real guarantees and they are proof-backed.
+            Within this transition, the pool&rsquo;s zero-knowledge proof
+            enforces core protocol rules on-chain: it verifies that spent notes
+            exist, the spender controls the required private keys, total inputs
+            equal total outputs plus fees, and no note is double spent.
           </p>
           <p className="prose mt-4 max-w-[62ch]">
-            The check that the amount paid equals the amount accepted is{" "}
-            <strong>a client-side check in the Rust SDK</strong>, not a predicate the STRK20
-            circuit evaluates. The circuit does not know what a negotiation is. A counterparty
-            running modified client code cannot steal your notes, since spending still requires
-            your key, but the binding between &ldquo;this is the price we agreed&rdquo; and
-            &ldquo;this is the amount that moved&rdquo; is enforced by software you are running,
-            not by the chain. Pushing that check into the settlement verifier is known work and it
-            is not done.
+            But the check that the amount paid equals the amount accepted lives{" "}
+            <strong>client-side, in the Rust SDK</strong>. The STRK20 circuit
+            does not know what a negotiation is, so it cannot evaluate that as a
+            predicate.
           </p>
           <p className="prose mt-4 max-w-[62ch]">
-            A settlement creates six notes when the payer&rsquo;s inputs match the price exactly,
-            and seven when they overshoot and a change note is minted.
+            A counterparty running modified client code cannot steal your notes,
+            as spending always requires your private key. However, matching the
+            agreed price to the transferred amount is enforced by your local
+            client software rather than the chain. Moving this check into the
+            settlement verifier is planned for a future release.
+          </p>
+          <p className="prose mt-4 max-w-[62ch]">
+            A settlement creates six notes when the payer&rsquo;s inputs match
+            the price exactly, and seven when they overshoot and a change note
+            is minted.
           </p>
         </DocSection>
 
         <DocSection id="disclose" n="05" title="Disclosure afterwards">
           <p className="prose max-w-[62ch]">
-            Confidentiality that cannot be selectively undone is not much use for anything
-            involving an auditor, a counterparty dispute, or a regulator. A grant derives the read
-            capability for exactly one deal in one direction, encrypts it to a recipient&rsquo;s
-            registered pool key, and binds an expiry.
+            Selective disclosure is essential for auditing, regulatory
+            compliance, and dispute resolution. A grant derives a unidirectional
+            read capability for a single deal, encrypts it to the
+            recipient&rsquo;s registered pool key, and binds an expiry.
           </p>
           <p className="prose mt-4 max-w-[62ch]">
-            The scope is the point. A recipient holding a grant for one deal cannot read the other
-            deals in the same channel, and cannot spend anything, because spending requires the
-            owner&rsquo;s pool private key and no grant contains one. This was demonstrated on
-            mainnet: a third account reconstructed one deal from a scoped grant and could not read
-            the two earlier deals in the same channel.
+            This read capability is strictly scoped. A grant holder can neither
+            read other deals within the same channel nor execute transactions,
+            as spending always requires the owner&rsquo;s pool private key. In
+            mainnet testing, a third-party account successfully reconstructed a
+            single deal from a scoped grant without exposing two earlier deals
+            in the same channel.
           </p>
           <p className="prose mt-4 max-w-[62ch]">
-            What a disclosed record does and does not establish is worth reading in full before
-            you rely on it. See <a href="/privacy#record" className="link">the privacy model</a>.
+            Read{" "}
+            <a href="/privacy#record" className="link">
+              the privacy model
+            </a>{" "}
+            before relying on a disclosed record. It documents plainly what such
+            a record does and does not establish.
           </p>
         </DocSection>
       </div>

@@ -40,9 +40,9 @@ export default function Architecture() {
       <div className="mt-16 md:mt-20">
         <DocSection id="map" n="01" title="System map">
           <p className="prose max-w-[62ch]">
-            One page, the whole system: the stack from agent to pool, the three layers, a deal
-            start to finish, how an offer becomes five notes, who sees what, and what the system
-            does and does not claim.
+            This one page covers the whole system: the stack running from agent to pool, the
+            three layers in between, a deal traced start to finish, how a single offer turns into
+            five notes, who can see what, and what the system does and does not claim to do.
           </p>
           <div className="mt-5">
             <SystemMap src="/erebus-overview.svg" alt={SYSTEM_MAP_ALT} />
@@ -76,26 +76,30 @@ export default function Architecture() {
             })}
           </div>
           <p className="prose mt-6 max-w-[62ch]">
-            You write <code>agents</code>; everything after it is Erebus infrastructure. Key
-            material never crosses one arrow. That is an enforced boundary at{" "}
-            <code style={{ color: "var(--color-ember)" }}>sdk/rs</code>, not a convention. The
-            policy engine decides what to do and never touches keys.
+            Agents manage decision policy, while Erebus infrastructure handles execution and key
+            management. The boundary at{" "}
+            <code style={{ color: "var(--color-ember)" }}>sdk/rs</code> strictly enforces key
+            isolation: the policy engine determines negotiation flows without ever reading or
+            accessing private key material.
           </p>
         </DocSection>
 
         <DocSection id="cli" n="03" title="The CLI protocol">
           <p className="prose max-w-[62ch]">
-            <code>erebus-cli</code> reads one JSON request on stdin and writes one envelope on
-            stdout. Key <em>paths</em> cross the boundary; key values never do.
+            <code>erebus-cli</code> receives a single JSON request via standard input (stdin) and
+            outputs a uniform response envelope to standard output (stdout). Key file paths cross
+            this execution boundary, but raw key values never do.
           </p>
           <div className="mt-5 space-y-3">
             <Snippet command={CLI_REQUEST} label="request" />
             <Snippet command={CLI_RESPONSE} label="response" />
           </div>
-          <p className="prose mt-6 max-w-[62ch]">
-            <code>protocol</code> is the contract version. A consumer should refuse a mismatch by
-            name rather than failing on a changed shape later. <code>erebus-sdk</code> does this
-            on every call, and the MCP server handshakes at startup.
+          <p className="label m-0 mb-3 mt-8 !text-fore-2">Protocol versioning</p>
+          <p className="prose max-w-[62ch]">
+            The <code>protocol</code> field designates the target contract version. Consumers
+            enforce compatibility upfront to prevent schema mismatches:{" "}
+            <code>erebus-sdk</code> validates the version number on every call, and the MCP
+            server verifies protocol compatibility during its startup handshake.
           </p>
           <p className="prose mt-4 max-w-[62ch]">
             <span className="mono-xs block text-fore-3">{CLI_METHODS}</span>
@@ -112,14 +116,16 @@ export default function Architecture() {
             <Snippet command={BUILD_RUST} label="rust" />
             <Snippet command={BUILD_PYTHON} label="python" />
           </div>
-          <p className="prose mt-6 max-w-[62ch]">
-            <code>uv sync</code> without <code>--all-packages</code> skips the workspace
-            members&rsquo; editable installs, and the <code>erebus-*</code> packages will not be
-            importable.
+          <p className="label m-0 mb-3 mt-8 !text-fore-2">Workspace dependencies</p>
+          <p className="prose max-w-[62ch]">
+            Always run <code>uv sync --all-packages</code>. Executing <code>uv sync</code>{" "}
+            without <code>--all-packages</code> skips editable installs for workspace members,
+            preventing local <code>erebus-*</code> packages from importing correctly.
           </p>
-          <p className="prose mt-4 max-w-[62ch]">
-            The TypeScript SDK is a differential-test oracle and ships nothing; it needs a sibling
-            checkout of <code>starkware-libs/starknet-privacy</code>. Toolchain: scarb 2.17.0 /
+          <p className="label m-0 mb-3 mt-8 !text-fore-2">TypeScript SDK</p>
+          <p className="prose max-w-[62ch]">
+            Serves exclusively as a differential-test oracle and requires a sibling checkout of{" "}
+            <code>starkware-libs/starknet-privacy</code> to function. Toolchain: scarb 2.17.0 /
             starknet-foundry 0.59.0, Node 20+, Rust stable.
           </p>
         </DocSection>
@@ -135,7 +141,8 @@ export default function Architecture() {
             ))}
           </ul>
           <p className="prose mt-6 max-w-[62ch]">
-            Unaudited, with no external security review. Do not use it for value you care about.
+            Unaudited, no external security review yet. Do not process high-value funds or
+            production assets through this software.
           </p>
         </DocSection>
       </div>

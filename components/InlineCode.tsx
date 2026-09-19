@@ -1,11 +1,20 @@
-/** Renders `backtick` spans in a plain string as <code>, same as the rest of the site's prose. */
+/**
+ * Renders `backtick` spans in a plain string as <code> and *asterisk* spans as <em>,
+ * same as the rest of the site's prose.
+ */
 export function InlineCode({ text }: { text: string }) {
-  const parts = text.split(/`([^`]+)`/g);
+  const parts = text.split(/(`[^`]+`|\*[^*]+\*)/g);
   return (
     <>
-      {parts.map((part, i) =>
-        i % 2 === 1 ? <code key={i}>{part}</code> : <span key={i}>{part}</span>,
-      )}
+      {parts.map((part, i) => {
+        if (part.startsWith("`") && part.endsWith("`")) {
+          return <code key={i}>{part.slice(1, -1)}</code>;
+        }
+        if (part.startsWith("*") && part.endsWith("*")) {
+          return <em key={i}>{part.slice(1, -1)}</em>;
+        }
+        return <span key={i}>{part}</span>;
+      })}
     </>
   );
 }

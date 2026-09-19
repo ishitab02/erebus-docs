@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Reveal } from "@/components/Reveal";
 import { DocSection } from "@/components/DocSection";
+import { InlineCode } from "@/components/InlineCode";
 import { NOT_DOES, PROD_GAPS, doc } from "@/lib/content";
 
 export const metadata: Metadata = {
@@ -23,23 +24,26 @@ export default function Limits() {
       <div className="mt-16 md:mt-20">
         <DocSection id="not" n="01" title="What Erebus does not do">
           <p className="prose max-w-[62ch]">
-            These are design boundaries rather than open bugs. Four of the five cannot be fixed
-            client-side, so no amount of care in your agent code works around them.
+            These constraints reflect protocol design boundaries rather than open bugs. Four of
+            the five are enforced at the protocol layer and cannot be bypassed in client-side
+            agent code.
           </p>
           <div className="mt-8 space-y-8">
             {NOT_DOES.map((n) => (
               <div key={n.title}>
                 <p className="mono-sm m-0 text-fore">{n.title}</p>
-                <p className="prose mt-2 max-w-[58ch]">{n.body}</p>
+                <p className="prose mt-2 max-w-[58ch]">
+                  <InlineCode text={n.body} />
+                </p>
               </div>
             ))}
           </div>
           <p className="prose mt-8 max-w-[62ch]">
-            The escrow limit is the one that most often changes a design. Because settlement is a
-            single atomic action set, the pool offers no timelock and no conditional release,
-            there is no point at which funds sit committed but undelivered. That makes Erebus a
-            good fit for work that is verifiable at the moment of payment, and a poor fit for
-            anything needing delivery-versus-payment.
+            The escrow limit ends up reshaping more designs than any other constraint here.
+            Settlement is a single atomic action set, and the pool provides no timelock and no
+            conditional release, so funds are never committed without also being delivered. This
+            makes Erebus a good fit for work that can be verified at the moment of payment, and a
+            poor fit for anything that needs delivery-versus-payment.
           </p>
         </DocSection>
 
@@ -56,41 +60,41 @@ export default function Limits() {
             ))}
           </dl>
           <p className="prose mt-6 max-w-[62ch]">
-            The security line is worth restating on its own. <strong>No independent
-            cryptographic or security review</strong> covers the wire, the settlement binding, the
-            disclosure design, the hosted-prover transport, or the recovery journal. Four bounded
-            mainnet runs demonstrate that the workflow completes. They do not establish capacity,
-            uptime, or safety under adversarial conditions.
+            <strong>No independent cryptographic or security review</strong> covers the wire, the
+            settlement binding, the disclosure design, the hosted-prover transport, or the
+            recovery journal. Four bounded mainnet runs show that the workflow completes; they do
+            not show capacity, uptime, or safety under adversarial conditions, since none of that
+            has been tested.
           </p>
         </DocSection>
 
         <DocSection id="use" n="03" title="Where that leaves you">
           <p className="prose max-w-[62ch]">
-            Reasonable uses today are bounded and low-frequency: evaluating the protocol,
-            developing against <code>mock</code>, running a demo, or a small canary on testnet
-            with value you are willing to lose. Every mainnet run so far has been deliberately
-            bounded in exactly this way.
+            Right now, it is advisable to stick to bounded, low-frequency work: evaluating the
+            protocol, developing against <code>mock</code>, running a demo, or a small testnet
+            canary using only value you can afford to lose. Every mainnet run so far has stayed
+            this bounded on purpose.
           </p>
           <p className="prose mt-4 max-w-[62ch]">
-            Use a dedicated low-value identity for anything touching mainnet. Registration is
-            irreversible and permanently places that identity inside the auditor&rsquo;s view, and
-            your choice of prover permanently places it inside that provider&rsquo;s view.
+            Use a dedicated low-value identity for anything that touches mainnet. Registration
+            cannot be reversed, and it permanently exposes that identity to the auditor.
+            Whichever prover you choose gets that same permanent exposure from its side.
           </p>
           <p className="prose mt-4 max-w-[62ch]">
-            If your use case depends on hiding the relationship rather than the terms, on escrow,
-            or on proving delivery, the honest answer is that Erebus does not do those things and
-            adding them is not a configuration change.
+            Erebus does not hide who you are dealing with, does not support escrow, and cannot
+            prove that delivery happened. If your use case needs any of those, that gap cannot be
+            closed with a configuration change.
           </p>
           <p className="prose mt-8 max-w-[62ch]">
-            The current gap list is{" "}
+            The current gap list lives at{" "}
             <a href={doc("docs/production-gaps.md")} className="link">
               production-gaps.md ↗
-            </a>
-            , and the tiebreaker for current state is{" "}
+            </a>{" "}
+            and{" "}
             <a href={doc("docs/status.md")} className="link">
               status.md ↗
-            </a>
-            . Where any page here disagrees with those, they are right and this is stale.
+            </a>{" "}
+            has the actual current state.
           </p>
         </DocSection>
       </div>

@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { Reveal } from "@/components/Reveal";
 import { DocSection } from "@/components/DocSection";
 import { Snippet } from "@/components/Snippet";
-import { TOOL_DETAILS, TOOL_GROUPS, VERSION_NOTE } from "@/lib/content";
+import { InlineCode } from "@/components/InlineCode";
+import { TOOL_DETAILS, TOOL_GROUPS } from "@/lib/content";
 
 export const metadata: Metadata = {
   title: "Erebus docs · Call the tools",
@@ -15,7 +16,7 @@ export default function Tools() {
       <Reveal className="max-w-[68ch]">
         <h1 className="display mb-0 text-[clamp(28px,4.4vw,56px)]">Call the tools.</h1>
         <p className="lead mt-6 max-w-[56ch]">
-          Thirteen tools, Protocol 5. Amounts are decimal strings, <code>memo_hash</code> is hex.
+          CLI Protocol 5 specification covering thirteen MCP tools.
         </p>
       </Reveal>
 
@@ -41,34 +42,46 @@ export default function Tools() {
             ))}
           </div>
           <p className="prose mt-5 max-w-[62ch]">
-            A full negotiation is <code>open_channel</code>, <code>propose_offer</code>,{" "}
-            <code>wait_for_offers</code>, <code>counter_offer</code>,{" "}
-            <code>accept_and_settle</code>, then <code>grant_viewing_key</code> and{" "}
-            <code>reveal</code>.
+            A standard negotiation lifecycle consists of <code>open_channel</code>,{" "}
+            <code>propose_offer</code>, <code>wait_for_offers</code>, <code>counter_offer</code>,
+            and <code>accept_and_settle</code>, followed by <code>grant_viewing_key</code> and{" "}
+            <code>reveal</code> for post-settlement disclosure.
           </p>
           <p className="prose mt-4 max-w-[62ch]">
-            Every write takes <code>operation_id</code>. Persist it and the intent before the
-            call, and reuse both after a restart. See <code>operation_id</code> under core
-            concepts.
+            Every write operation requires an <code>operation_id</code>. Persist both the ID and
+            the operation intent prior to invocation, and reuse the same ID across system
+            restarts. More on this under{" "}
+            <a href="/concepts#concepts" className="link">
+              core concepts
+            </a>
+            .
           </p>
-          <p className="prose mt-4 max-w-[62ch]">{VERSION_NOTE}</p>
+          <p className="prose mt-4 max-w-[62ch]">
+            This page documents <strong>CLI Protocol 5</strong> (
+            <strong>v0.3.0</strong>), which exposes the thirteen tools listed above. Protocol 5
+            introduces installed account onboarding (<code>erebus-init</code>) while retaining
+            Protocol 4&rsquo;s <code>operation_id</code> mechanics for settlement requests.
+            Version <strong>v0.2.0</strong> implements <strong>Protocol 4</strong>, while{" "}
+            <strong>v0.1.0</strong> implements <strong>Protocol 2</strong> with ten tools. To
+            prevent downstream schema errors, <code>erebus-sdk</code> validates protocol
+            compatibility by protocol number prior to execution.
+          </p>
         </DocSection>
 
         <DocSection id="examples" n="02" title="Request and response, per tool">
           <p className="prose max-w-[62ch]">
-            Every envelope is <code>{"{ok, backend, network, result | error}"}</code>. A write
-            also carries back the <code>operation_id</code> it was called with.{" "}
-            <code>{'{"...": "..."}'}</code> marks a value elided for length, not a real field
-            name.
+            All responses use the standard envelope{" "}
+            <code>{"{ok, backend, network, result | error}"}</code>. Write operations include the{" "}
+            <code>operation_id</code> supplied in the request. In the examples below,{" "}
+            <code>{'{"...": "..."}'}</code> indicates fields truncated for readability.
           </p>
           <p className="prose mt-4 max-w-[62ch]">
-            An <code>offer_id</code> reads as{" "}
-            <code>{"<channel>:us:<n>"}</code> or <code>{"<channel>:them:<n>"}</code>, and the{" "}
-            <code>us</code> and <code>them</code> are relative to whoever is calling. The same
-            offer is <code>us:0</code> to the side that made it and <code>them:0</code> to the
-            side that received it, so an id copied from one agent&rsquo;s transcript into the
-            other&rsquo;s call will not resolve. Except where noted, these examples are one
-            payer&rsquo;s session.
+            An <code>offer_id</code> uses the format <code>{"<channel>:us:<n>"}</code> or{" "}
+            <code>{"<channel>:them:<n>"}</code>, where <code>us</code> and <code>them</code> are
+            relative to the caller. A single offer appears as <code>us:0</code> to its proposer
+            and <code>them:0</code> to the recipient; consequently, an ID copied directly from a
+            counterparty&rsquo;s transcript will not resolve locally. Unless noted otherwise,
+            example payloads represent a single payer session.
           </p>
           <div className="mt-8 space-y-10 border-t border-rule pt-8">
             {TOOL_GROUPS.flatMap((g) => g.tools).map((t) => {
@@ -91,7 +104,11 @@ export default function Tools() {
                       <Snippet command={d.response} label={`${t}-response`} />
                     </div>
                   </div>
-                  {d.detail ? <p className="prose mt-3 max-w-[62ch] text-fore-3">{d.detail}</p> : null}
+                  {d.detail ? (
+                    <p className="prose mt-3 max-w-[62ch] text-fore-3">
+                      <InlineCode text={d.detail} />
+                    </p>
+                  ) : null}
                 </div>
               );
             })}

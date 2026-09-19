@@ -2,7 +2,13 @@ import type { Metadata } from "next";
 import { Reveal } from "@/components/Reveal";
 import { Snippet } from "@/components/Snippet";
 import { DocSection } from "@/components/DocSection";
-import { ENV_VARS, IDENTITY_BOOTSTRAP, IDENTITY_KEYS, INSTALL, MCP_CONFIG } from "@/lib/content";
+import {
+  ENV_VARS,
+  IDENTITY_BOOTSTRAP,
+  IDENTITY_KEYS,
+  INSTALL,
+  MCP_CONFIG,
+} from "@/lib/content";
 
 export const metadata: Metadata = {
   title: "Erebus docs · Quickstart",
@@ -14,10 +20,13 @@ export default function Docs() {
   return (
     <>
       <Reveal className="max-w-[68ch]">
-        <h1 className="display mb-0 text-[clamp(36px,6vw,80px)]">Get started.</h1>
+        <h1 className="display mb-0 text-[clamp(36px,6vw,80px)]">
+          Get started.
+        </h1>
         <p className="lead mt-8 max-w-[56ch]">
-          Erebus runs as an MCP server. Install it, give it an identity, and any client that can
-          set environment can drive a negotiation and a shielded settlement.
+          Erebus runs as an MCP server. Install it, give it an identity, and any
+          client that can set environment can drive a negotiation and a shielded
+          settlement.
         </p>
       </Reveal>
 
@@ -25,49 +34,61 @@ export default function Docs() {
         <DocSection id="install" n="01" title="Install">
           <Snippet command={INSTALL} label="install" highlight />
           <p className="prose mt-5 max-w-[62ch]">
-            That installs the MCP server, the Python binding, and the Rust binary as a platform
-            wheel. No Rust toolchain is needed. Linux x86-64 and macOS arm64.
+            This installs the MCP server, the Python binding, and the Rust
+            binary, prebuilt as a platform wheel, so there is no Rust toolchain
+            to install on your end. We ship binaries for Linux x86-64 and macOS
+            arm64 right now, and anything outside that means building from
+            source yourself.
           </p>
           <p className="prose mt-4 max-w-[62ch]">
-            <code>--python 3.12</code> is required, not decoration. Without it, <code>uv</code>{" "}
-            uses whatever interpreter it finds and won&rsquo;t download one. On a machine whose
-            only Python is the system 3.9, the install fails with a dependency error that never
-            mentions Python. With the flag, <code>uv</code> fetches a managed 3.12 itself.
+            <code>--python 3.12</code> is required. If omitted, <code>uv</code>{" "}
+            defaults to your host system&rsquo;s Python interpreter. On older
+            environments (such as Python 3.9), this causes dependency errors
+            that do not explicitly reference the Python version. Explicitly
+            passing <code>--python 3.12</code> ensures <code>uv</code> downloads
+            and manages its own isolated runtime.
           </p>
           <p className="prose mt-4 max-w-[62ch]">
             To run everything with no chain, no keys, and no gas, set{" "}
-            <code>EREBUS_BACKEND=mock</code>.
+            <code>EREBUS_BACKEND=mock</code>
           </p>
         </DocSection>
 
         <DocSection id="identity" n="02" title="Set up an identity">
           <p className="prose max-w-[62ch]">
-            An identity is a Starknet account plus two key files, registered with the pool and
-            holding shielded notes. One command walks through it:
+            In Erebus, an identity is a Starknet account plus two key files,
+            registered with the pool and holding shielded notes. One command
+            walks you through the whole thing:
           </p>
           <div className="mt-5">
             <Snippet command={IDENTITY_BOOTSTRAP} label="init" accent />
           </div>
           <p className="prose mt-5 max-w-[62ch]">
-            Select an existing account or type <code>new</code>. It prints the address and
-            funding shortfall; send STRK to that address, then confirm. Setup deploys a new
-            account when necessary, approves the allowance, waits for proving depth, shields
-            the chosen deposit, and runs <code>doctor</code>. If it times out or you close it,
-            continue with the printed <code>--resume</code> command; the selected address,
-            keys, and operation IDs survive the restart. For agents, <code>--list-accounts
-            --json</code>, <code>--account &lt;id&gt;</code>, <code>--new</code>, and{" "}
-            <code>--resume</code> make the choice explicit, and <code>--yes</code> authorizes
-            the setup transactions.
+            Select an existing account, or type <code>new</code> to create one.
+            The command prints the account address and the funding shortfall;
+            send STRK to that address and confirm to continue. From there, setup
+            deploys a new account when required, approves the allowance, waits
+            for proving depth, shields the chosen deposit, and finishes by
+            running <code>doctor</code>. If the process times out or you close
+            it before completion, resume it with <code>--resume</code> command;
+            the selected address, keys, and operation IDs persist across the
+            restart. For agents, <code>--list-accounts --json</code>,{" "}
+            <code>--account &lt;id&gt;</code>, <code>--new</code>, and{" "}
+            <code>--resume</code> make the choice explicit, and{" "}
+            <code>--yes</code> authorizes the setup transactions without a
+            prompt.
           </p>
           <p className="prose mt-4 max-w-[62ch]">
-            <strong>Registration is irreversible</strong> and writes the identity&rsquo;s pool
-            private key, encrypted, to the pool&rsquo;s auditor on-chain. From that moment the
-            auditor can decrypt everything that identity ever does. Use a dedicated low-value
-            identity for any mainnet canary.
+            <strong>Registration cannot be undone.</strong> It writes your
+            identity&rsquo;s pool private key, encrypted, to the pool&rsquo;s
+            auditor on-chain, granting the auditor visibility to decrypt all
+            transactions linked to that identity. For any mainnet canary, use a
+            disposable identity rather than your primary account.
           </p>
 
           <p className="prose mt-8 max-w-[62ch]">
-            Three keys come out of this, and conflating them is the usual mistake:
+            This process generates three distinct keys. Conflating their roles
+            is a common source of configuration errors:
           </p>
           <dl className="mt-5 border-t border-rule">
             {IDENTITY_KEYS.map((k) => (
@@ -89,8 +110,9 @@ export default function Docs() {
         <DocSection id="configure" n="03" title="Configure an identity">
           <Snippet command={MCP_CONFIG} label="mcpServers" />
           <p className="prose mt-5 max-w-[62ch]">
-            A negotiation has two sides. Register the counterparty as a second entry with its own
-            identity, state directory, and <code>EREBUS_SETTLEMENT_ROLE=payee</code>.
+            A negotiation has two sides. Register the counterparty as a second
+            entry with its own identity, state directory, and{" "}
+            <code>EREBUS_SETTLEMENT_ROLE=payee</code>.
           </p>
 
           <dl className="mt-8 border-t border-rule">
@@ -106,10 +128,13 @@ export default function Docs() {
             ))}
           </dl>
           <p className="prose mt-5 max-w-[62ch]">
-            <code>doctor</code> checks all of this before a write ever reaches the chain: key
-            files and their modes, the state directory, RPC, prover, chain id, registration,
-            allowance, and balance, each failing check naming one direct repair. Run it first when
-            anything above is in doubt.
+            <code>doctor</code> performs preflight validation before any
+            transaction is submitted on-chain. It inspects local key files and
+            permissions, state directory setup, RPC endpoint connectivity,
+            prover availability, chain ID, registration status, token allowance,
+            and account balance. Any failed check returns a specific remediation
+            step. Run this command first whenever setup or execution errors
+            occur.
           </p>
         </DocSection>
       </div>

@@ -6,16 +6,20 @@ import { CONCEPTS } from "@/lib/content";
 
 export const metadata: Metadata = {
   title: "Erebus docs · Core concepts",
-  description: "Channel, offer, deal, note, operation_id, viewing grant. The vocabulary the rest of the docs assume.",
+  description:
+    "Channel, offer, deal, note, operation_id, viewing grant. The vocabulary the rest of the docs assume.",
 };
 
 export default function Concepts() {
   return (
     <>
       <Reveal className="max-w-[68ch]">
-        <h1 className="display mb-0 text-[clamp(28px,4.4vw,56px)]">Core concepts.</h1>
+        <h1 className="display mb-0 text-[clamp(28px,4.4vw,56px)]">
+          Core concepts.
+        </h1>
         <p className="lead mt-6 max-w-[56ch]">
-          Six terms the rest of these pages assume. Read this once before the tool reference.
+          Six terms that the rest of these pages assume. Skim this once before
+          the tool reference.
         </p>
       </Reveal>
 

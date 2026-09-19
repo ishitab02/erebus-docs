@@ -22,9 +22,9 @@ export default function Errors() {
       <div className="mt-16 md:mt-20">
         <DocSection id="responses" n="01" title="The envelope">
           <p className="prose max-w-[62ch]">
-            Every result comes back the same shape, success or failure, with <code>backend</code>{" "}
-            (<code>mock</code> or <code>seam</code>) and <code>network</code> on both, so a
-            transcript alone says whether a call touched a real chain and which one.
+            All responses use the same envelope format, whether a call succeeds or fails. Every
+            response includes <code>backend</code> (<code>mock</code> or <code>seam</code>) and{" "}
+            <code>network</code> metadata, so logs show whether and where the call ran on-chain.
           </p>
           <div className="mt-6 space-y-3">
             <Snippet command={RESPONSE_OK} label="ok" />
@@ -32,8 +32,10 @@ export default function Errors() {
           </div>
 
           <p className="prose mt-8 max-w-[62ch]">
-            Branch on the group below, not the individual code. <code>retryable</code> on the
-            error is the thing to trust, not a guess from the name.
+            Categorize errors based on their error group rather than by individual code. Always
+            check the{" "}
+            <code>retryable</code> boolean field on the error object to determine if a call can be
+            retried. Do not guess retry behavior from the error code name.
           </p>
           <div className="mt-6 border-t border-rule">
             {ERROR_GROUPS.map((e) => (
@@ -59,9 +61,11 @@ export default function Errors() {
             ))}
           </div>
           <p className="prose mt-6 max-w-[62ch]">
-            A write takes one to four minutes. Do not create a new <code>operation_id</code> for
-            one that appears stuck. Call <code>reconcile</code>, then{" "}
-            <code>resume_operation</code> with the original ID once its result permits it.
+            Write operations take 1-4 minutes due to proof generation, so a delay in this window
+            does not mean the call failed. Never create a new <code>operation_id</code> for a slow
+            write, as this risks duplicate transactions and double payment. Call{" "}
+            <code>reconcile</code> first to inspect state, then run <code>resume_operation</code>{" "}
+            with the original <code>operation_id</code> when permitted.
           </p>
         </DocSection>
       </div>

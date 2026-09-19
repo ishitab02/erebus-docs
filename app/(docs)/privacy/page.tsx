@@ -37,7 +37,9 @@ export default function Privacy() {
           <p className="prose max-w-[62ch]">{PRIVACY_CLAIM}</p>
 
           <p className="label m-0 mb-3 mt-8 !text-fore-2">The non-claim</p>
-          <p className="prose max-w-[62ch]">{PRIVACY_NONCLAIM}</p>
+          <p className="prose max-w-[62ch]">
+            <InlineCode text={PRIVACY_NONCLAIM} />
+          </p>
 
           <p
             className="mt-8 max-w-[52ch] border-l-2 py-1 pl-5 text-[clamp(17px,1.9vw,23px)] leading-[1.35] text-fore"
@@ -46,8 +48,9 @@ export default function Privacy() {
             {PRIVACY_ONE_LINE}
           </p>
           <p className="prose mt-6 max-w-[62ch]">
-            Never describe this as private in an absolute sense. If a decision depends on an
-            observer not knowing that two parties transacted, Erebus does not give you that today.
+            Erebus provides payload confidentiality rather than absolute privacy. If your threat
+            model requires concealing that two parties transacted at all, Erebus does not support
+            that requirement.
           </p>
         </DocSection>
 
@@ -71,16 +74,16 @@ export default function Privacy() {
             ))}
           </dl>
           <p className="prose mt-6 max-w-[62ch]">
-            Granting and revealing produce no chain activity at all. Disclosure is a local read
-            against data that is already on chain, which is why a grant costs no gas and leaves no
-            trace.
+            Granting and revealing produce zero chain activity. Disclosure is just a local read
+            against data that is already on chain, which is why a grant costs no gas and leaves
+            no trace behind.
           </p>
         </DocSection>
 
         <DocSection id="leaks" n="03" title="The known leaks">
           <p className="prose max-w-[62ch]">
-            In descending severity. These are not hypothetical: each one is either measured in
-            this repository or visible in the upstream contract source.
+            Listed in descending order of severity. Each one is either something we measured in
+            this repository or something you can see directly in the upstream contract source.
           </p>
           <div className="mt-8 space-y-10">
             {KNOWN_LEAKS.map((l) => (
@@ -91,7 +94,9 @@ export default function Privacy() {
                   <p className="prose mt-3 max-w-[58ch]">
                     <InlineCode text={l.body} />
                   </p>
-                  <p className="mono-xs mt-3 max-w-[58ch] text-fore-3">{l.fix}</p>
+                  <p className="mono-xs mt-3 max-w-[58ch] text-fore-3">
+                    <InlineCode text={l.fix} />
+                  </p>
                 </div>
               </div>
             ))}
@@ -100,9 +105,9 @@ export default function Privacy() {
 
         <DocSection id="infra" n="04" title="Infrastructure sees more than the chain">
           <p className="prose max-w-[62ch]">
-            The chain is not the only observer, and this is the part most readers miss. The pool
-            is an account contract simulated locally, so the compiled action set embeds the pool
-            private key in its calldata. Two endpoints receive that calldata.
+            The chain is not the only observer. The pool is an account contract simulated
+            locally, so the compiled action set embeds the pool private key directly in its
+            calldata. Two endpoints receive that calldata.
           </p>
           <dl className="mt-6 border-t border-rule">
             {INFRA_VISIBILITY.map((e) => (
@@ -119,18 +124,20 @@ export default function Privacy() {
           <p className="prose mt-6 max-w-[62ch]">
             Both can therefore reconstruct that identity&rsquo;s full history. The exposure
             aggregates across users on a shared prover, and it is permanent: there is no rotation
-            and no revocation. Choosing a hosted prover means choosing to put that provider inside
-            your confidentiality boundary. Self-hosting removes the provider and adds node,
-            storage, screening, and uptime work.
+            and no revocation. Using a hosted prover means trusting that provider with your
+            private data. Running your own prover removes that provider, but then you have to
+            handle the node, storage, screening, and uptime work yourself.
           </p>
           <p className="prose mt-4 max-w-[62ch]">
-            The submitted transaction does not carry the key. That part of the design holds.
+            The submitted transaction itself never includes the key, so this one part of the
+            design stays safe.
           </p>
           <p className="prose mt-4 max-w-[62ch]">
-            Separately, registration writes your pool private key, encrypted, to a single
-            pool-wide auditor key. It is set once, it covers everything that identity ever does,
-            and it is not something you grant. It happens the moment you register, and it cannot
-            be undone. Use a dedicated low-value identity for anything on mainnet.
+            Separately, registration writes your pool private key, encrypted, to one auditor key
+            that covers the whole pool. This is set once, it covers everything that identity ever
+            does, and you never get asked to approve it, it happens the moment you register.
+            There is no undoing it afterward. Use a separate, low-value identity for anything you
+            put on mainnet.
           </p>
         </DocSection>
 
@@ -144,17 +151,17 @@ export default function Privacy() {
             <InlineCode text={DISCLOSURE_ASSERTS} />
           </p>
           <p className="prose mt-8 max-w-[62ch]">
-            Atomicity is narrower than semantic proof. The acceptance and the payment share one
-            action set, but the amount-equality check is client-side validation, not a statement
-            that the STRK20 circuit understands the negotiation.
+            This atomicity guarantee is limited. The acceptance and the payment share one action
+            set, but the amount-equality check runs client-side. The STRK20 circuit does not
+            understand what a negotiation is, so it cannot prove that the negotiation and the
+            payment actually match.
           </p>
           <p className="prose mt-6 max-w-[62ch]">
-            The canonical version of this page, with the contract line references behind each
-            claim, is{" "}
+            The canonical version of this page is{" "}
             <a href={doc("docs/privacy-model.md")} className="link">
               privacy-model.md ↗
             </a>
-            . Where the two disagree, that file is right and this page is stale.
+            , which includes the contract line references behind each claim.
           </p>
         </DocSection>
       </div>
