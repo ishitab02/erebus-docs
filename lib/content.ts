@@ -248,8 +248,8 @@ export const ENV_VARS = [
   { k: "EREBUS_NETWORK", v: "sepolia · mainnet", note: "" },
   {
     k: "EREBUS_SETTLEMENT_ROLE",
-    v: "payer · payee",
-    note: "accept_and_settle spends the caller’s notes",
+    v: "payer · payee · both",
+    note: "a payee server structurally refuses accept_and_settle",
   },
   { k: "AGENT_ADDRESS", v: "0x…", note: "the calling account" },
   { k: "STARKNET_RPC_URL", v: "https://…", note: "" },
@@ -262,6 +262,12 @@ export const ENV_VARS = [
     k: "EREBUS_SPENDING_LIMITS",
     v: "JSON, optional",
     note: "per-token cap on what accept_and_settle can spend",
+  },
+  { k: "POOL_ADDRESS", v: "0x…, optional", note: "overrides the default pool for the seam backend" },
+  {
+    k: "STARKNET_CHAIN_ID",
+    v: "optional",
+    note: "overrides the default chain id for the seam backend",
   },
 ] as const;
 
@@ -559,7 +565,7 @@ export const IDENTITY_KEYS = [
 /* ── The CLI protocol · docs/reference.md §The CLI protocol ──────────────── */
 
 export const CLI_REQUEST = `echo '{"method":"doctor","params":{"config":{...}}}' | erebus-cli`;
-export const CLI_RESPONSE = `{"ok": true, "protocol": 4, "result": {"ready": true, "checks": [...]}}`;
+export const CLI_RESPONSE = `{"ok": true, "protocol": 5, "result": {"ready": true, "checks": [...]}}`;
 
 export const CLI_METHODS =
   "version, generate_pool_key, doctor, balance, allowance, approve, shield, open_channel, propose_offer, counter_offer, read_channel_state, accept_and_settle, reconcile, resume_operation, rebuild_state, grant_viewing_key, reveal";
