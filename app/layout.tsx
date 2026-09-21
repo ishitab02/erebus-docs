@@ -4,6 +4,7 @@ import { KeyProvider } from "@/components/KeyContext";
 import { SmoothScroll } from "@/components/SmoothScroll";
 import { Grain } from "@/components/Grain";
 import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 
 // Three faces doing three different jobs, not one grotesque stretched to
@@ -106,6 +107,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <Grain />
         </KeyProvider>
         <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
