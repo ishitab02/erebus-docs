@@ -13,7 +13,7 @@ import {
 export const metadata: Metadata = {
   title: "Erebus docs · Quickstart",
   description:
-    "Install the Erebus MCP server, configure an identity, and drive a shielded settlement from any agent framework.",
+    "Install the Erebus MCP server and configure identities for encrypted negotiation and shielded settlement.",
 };
 
 export default function Docs() {
@@ -24,9 +24,9 @@ export default function Docs() {
           Get started.
         </h1>
         <p className="lead mt-8 max-w-[56ch]">
-          Erebus runs as an MCP server. Install it, give it an identity, and configure
-          environment variables to drive a private negotiation and shielded settlement
-          from any supported client.
+          Erebus is private settlement and negotiation infrastructure for AI
+          agents. Its MCP server lets two agents exchange encrypted offers and
+          settle through the STRK20 pool on Starknet.
         </p>
       </Reveal>
 
@@ -34,31 +34,36 @@ export default function Docs() {
         <DocSection id="install" n="01" title="Install">
           <Snippet command={INSTALL} label="install" highlight />
           <p className="prose mt-5 max-w-[62ch]">
-            This installs the MCP server, the Python binding, and the Rust
-            binary, prebuilt as a platform wheel, so there is no Rust toolchain
-            to install on your end. We ship binaries for Linux x86-64 and macOS
-            arm64 right now, and anything outside that means building from
-            source yourself.
+            The package includes the MCP server, Python binding, and Rust
+            binary. Linux x86-64 and macOS arm64 have prebuilt packages. Other
+            platforms require a source build.
           </p>
           <p className="prose mt-4 max-w-[62ch]">
-            <code>--python 3.12</code> is required. If omitted, <code>uv</code>{" "}
-            defaults to your host system&rsquo;s Python interpreter. On older
-            environments (such as Python 3.9), this causes dependency errors
-            that do not explicitly reference the Python version. Explicitly
-            passing <code>--python 3.12</code> ensures <code>uv</code> downloads
-            and manages its own isolated runtime.
+            Keep <code>--python 3.12</code> in the install command to select a
+            supported Python version. This avoids dependency errors from an
+            older system interpreter. <code>uv</code> can download Python if
+            needed.
           </p>
           <p className="prose mt-4 max-w-[62ch]">
-            To run everything with no chain, no keys, and no gas, set{" "}
-            <code>EREBUS_BACKEND=mock</code>
+            For a local trial without funds or keys, create a separate mock
+            configuration:
+          </p>
+          <Snippet
+            command="erebus-init --network mock --config ~/.erebus-mock.env"
+            label="mock setup"
+          />
+          <p className="prose mt-4 max-w-[62ch]">
+            Configure your MCP client to launch <code>erebus-mcp-server</code>{" "}
+            with <code>--config ~/.erebus-mock.env</code>. Use an absolute path
+            if your client does not expand <code>~</code>.
           </p>
         </DocSection>
 
         <DocSection id="identity" n="02" title="Set up an identity">
           <p className="prose max-w-[62ch]">
             In Erebus, an identity is a Starknet account plus two key files,
-            registered with the pool and holding shielded notes. One command
-            walks you through the whole thing:
+            registered with the pool and holding shielded notes. Run the
+            initializer to create or select an account:
           </p>
           <div className="mt-5">
             <Snippet command={IDENTITY_BOOTSTRAP} label="init" accent />
@@ -70,9 +75,10 @@ export default function Docs() {
             deploys a new account when required, approves the allowance, waits
             for proving depth, shields the chosen deposit, and finishes by
             running <code>doctor</code>. If the process times out or you close
-            it before completion, resume it with <code>--resume</code> command;
-            the selected address, keys, and operation IDs persist across the
-            restart. For agents, <code>--list-accounts --json</code>,{" "}
+            it before completion, use the printed{" "}
+            <code>erebus-init --config ... --resume</code> command; the selected
+            address, keys, and operation IDs persist across the restart. For
+            agents, <code>--list-accounts --json</code>,{" "}
             <code>--account &lt;id&gt;</code>, <code>--new</code>, and{" "}
             <code>--resume</code> make the choice explicit, and{" "}
             <code>--yes</code> authorizes the setup transactions without a
@@ -87,8 +93,8 @@ export default function Docs() {
           </p>
 
           <p className="prose mt-8 max-w-[62ch]">
-            This process generates three distinct keys. Conflating their roles
-            is a common source of configuration errors:
+            Two keys belong to your identity. A third belongs to the pool
+            auditor. Their roles differ:
           </p>
           <dl className="mt-5 border-t border-rule">
             {IDENTITY_KEYS.map((k) => (
@@ -128,13 +134,12 @@ export default function Docs() {
             ))}
           </dl>
           <p className="prose mt-5 max-w-[62ch]">
-            <code>doctor</code> performs preflight validation before any
-            transaction is submitted on-chain. It inspects local key files and
-            permissions, state directory setup, RPC endpoint connectivity,
-            prover availability, chain ID, registration status, token allowance,
-            and account balance. Any failed check returns a specific remediation
-            step. Run this command first whenever setup or execution errors
-            occur.
+            <code>doctor</code> checks whether the identity is ready to submit
+            transactions. It inspects local key files and permissions, state
+            directory setup, RPC endpoint connectivity, prover availability,
+            chain ID, registration status, token allowance, and account balance.
+            Any failed check returns a specific repair step. Run this command
+            first whenever setup or execution errors occur.
           </p>
         </DocSection>
       </div>

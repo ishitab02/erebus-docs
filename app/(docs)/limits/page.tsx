@@ -7,7 +7,7 @@ import { NOT_DOES, PROD_GAPS, doc } from "@/lib/content";
 export const metadata: Metadata = {
   title: "Erebus docs · Limits",
   description:
-    "What Erebus does not do, what is unfinished before production, and which workloads it actually fits.",
+    "What Erebus does not do, what is unfinished before production, and the limits of the recorded tests.",
 };
 
 export default function Limits() {
@@ -16,17 +16,17 @@ export default function Limits() {
       <Reveal className="max-w-[68ch]">
         <h1 className="display mb-0 text-[clamp(28px,4.4vw,56px)]">Limits.</h1>
         <p className="lead mt-6 max-w-[56ch]">
-          Outlines protocol design boundaries, unfinished features, and production safety
-          constraints.
+          Erebus has no escrow, delivery verification, or relationship privacy.
+          It also needs further security review and operational testing before
+          production use.
         </p>
       </Reveal>
 
       <div className="mt-16 md:mt-20">
         <DocSection id="not" n="01" title="What Erebus does not do">
           <p className="prose max-w-[62ch]">
-            These constraints reflect protocol design boundaries rather than open bugs. Four of
-            the five are enforced at the protocol layer and cannot be bypassed in client-side
-            agent code.
+            The current implementation has the limits below. Configuration
+            changes alone cannot remove them.
           </p>
           <div className="mt-8 space-y-8">
             {NOT_DOES.map((n) => (
@@ -39,11 +39,10 @@ export default function Limits() {
             ))}
           </div>
           <p className="prose mt-8 max-w-[62ch]">
-            The escrow limit ends up reshaping more designs than any other constraint here.
-            Settlement is a single atomic action set, and the pool provides no timelock and no
-            conditional release, so funds are never committed without also being delivered. This
-            makes Erebus a good fit for work that can be verified at the moment of payment, and a
-            poor fit for anything that needs delivery-versus-payment.
+            Settlement transfers funds immediately. The pool cannot hold them
+            until a later delivery or release them when an external condition is
+            met. Your application must decide whether to pay before it calls
+            settlement.
           </p>
         </DocSection>
 
@@ -60,30 +59,32 @@ export default function Limits() {
             ))}
           </dl>
           <p className="prose mt-6 max-w-[62ch]">
-            <strong>No independent cryptographic or security review</strong> covers the wire, the
-            settlement binding, the disclosure design, the hosted-prover transport, or the
-            recovery journal. Four bounded mainnet runs show that the workflow completes; they do
-            not show capacity, uptime, or safety under adversarial conditions, since none of that
-            has been tested.
+            <strong>No independent cryptographic or security review</strong>{" "}
+            covers the wire, the settlement binding, the disclosure design, the
+            hosted-prover transport, or the recovery journal. Four bounded
+            mainnet runs show that the workflow completes; they do not show
+            capacity, uptime, or safety under adversarial conditions, since none
+            of that has been tested.
           </p>
         </DocSection>
 
         <DocSection id="use" n="03" title="Where that leaves you">
           <p className="prose max-w-[62ch]">
-            Right now, it is advisable to stick to bounded, low-frequency work: evaluating the
-            protocol, developing against <code>mock</code>, running a demo, or a small testnet
-            canary using only value you can afford to lose. Every mainnet run so far has stayed
-            this bounded on purpose.
+            Use Erebus for small evaluations: develop against <code>mock</code>,
+            run a demo, or test a small transaction on Sepolia. The recorded
+            mainnet runs do not establish production readiness.
           </p>
           <p className="prose mt-4 max-w-[62ch]">
-            Use a dedicated low-value identity for anything that touches mainnet. Registration
-            cannot be reversed, and it permanently exposes that identity to the auditor.
-            Whichever prover you choose gets that same permanent exposure from its side.
+            Use a dedicated low-value identity for anything that touches
+            mainnet. Registration cannot be reversed, and it permanently exposes
+            that identity to the auditor. Whichever prover you choose gets that
+            same permanent exposure from its side.
           </p>
           <p className="prose mt-4 max-w-[62ch]">
-            Erebus does not hide who you are dealing with, does not support escrow, and cannot
-            prove that delivery happened. If your use case needs any of those, that gap cannot be
-            closed with a configuration change.
+            Erebus does not hide who you are dealing with, does not support
+            escrow, and cannot prove that delivery happened. If your use case
+            needs any of those, that gap cannot be closed with a configuration
+            change.
           </p>
           <p className="prose mt-8 max-w-[62ch]">
             The current gap list lives at{" "}

@@ -429,9 +429,7 @@ input[type="range"]::-moz-range-thumb {
     radial-gradient(60% 45% at 96% 8%, rgba(251, 64, 32, 0.14), transparent 65%);
 }
 
-/* ── the install card. Highlighted with color and a border, sitting beside
-   the CTA in the hero — not folded into the nav where an action this
-   load-bearing gets lost among links. ─────────────────────────────────── */
+/* Highlight the install command. */
 
 .install-card {
   border: 1px solid var(--color-ember);
@@ -440,9 +438,8 @@ input[type="range"]::-moz-range-thumb {
   box-shadow: 0 0 0 1px rgba(251, 64, 32, 0.18), 0 20px 60px -20px rgba(251, 64, 32, 0.45);
 }
 
-/* ── the boundary mark. Same ember border language as install-card, sized
-   down for one box in a call-path diagram instead of a whole card — this is
-   the one edge in the chain that is enforced, not a convention. ──────────── */
+/* Mark the Rust process in the call-path diagram. */
+
 .boundary-mark {
   border: 1px solid var(--color-ember);
   color: var(--color-fore);

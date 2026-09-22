@@ -7,7 +7,7 @@ import {
   WALK_COUNTER,
   WALK_OPEN,
   WALK_SETTLE,
-  WALK_SHIELD,
+  WALK_SETUP,
   doc,
 } from "@/lib/content";
 
@@ -25,35 +25,38 @@ export default function Walkthrough() {
           Walkthrough.
         </h1>
         <p className="lead mt-6 max-w-[56ch]">
-          Step-by-step execution guide for running an end-to-end negotiation and
-          settlement between two local identities. Demonstrates mock execution before
-          testnet deployment.
+          Run a negotiation and settlement on Sepolia with two identities. These
+          commands use the helper scripts in the main Erebus repository.
         </p>
       </Reveal>
 
       <div className="mt-16 md:mt-20">
         <DocSection id="before" n="01" title="Before you start">
           <p className="prose max-w-[62ch]">
-            You need two identities, because a negotiation has two sides and
-            each one settles from its own notes. Follow{" "}
+            Install the package from{" "}
             <a href="/" className="link">
               the quickstart
             </a>{" "}
-            twice, once per identity, into two separate state directories. Then
-            shield funds on the payer side, which also registers the identity
-            and makes it available as a counterparty.
+            first. The shell examples also need Git, Python 3, and a Rust
+            toolchain. Clone the main repository, build its CLI, and initialize
+            two Sepolia identities with the commands below. Choose separate
+            accounts and keep the generated keys and state directories separate.
+            Setup asks you to fund each account, then shields the deposit and
+            registers the identity. The payer needs at least 1 STRK in shielded
+            notes for this example; both sides also need public STRK for fees.
           </p>
           <div className="mt-5">
-            <Snippet command={WALK_SHIELD} label="shield" accent />
+            <Snippet command={WALK_SETUP} label="setup" accent />
           </div>
           <p className="prose mt-5 max-w-[62ch]">
-            If the approval is too fresh, the shield can fail, since the proof
-            gets built against a historical block. Give the approval time to
-            reach proving depth before you retry.
+            Run the remaining commands from the cloned repository. The helper
+            scripts use the CLI you just built. If setup pauses, use its printed
+            resume command. Do not repeat a shield request with a new operation
+            ID.
           </p>
 
           <p className="prose mt-8 max-w-[62ch]">
-            Two easily overlooked costs frequently cause initial setup errors:
+            Budget for both public fees and shielded payment funds:
           </p>
           <ul className="mt-4 max-w-[62ch] list-disc space-y-3 pl-5">
             <li className="prose m-0">
@@ -85,23 +88,24 @@ export default function Walkthrough() {
             <Snippet command={WALK_COUNTER} label="payee" />
           </div>
           <p className="prose mt-6 max-w-[62ch]">
-            Call <code>get_note_balance</code> on the payer side to confirm
-            sufficient funds before proposing a price. Values are expressed in
-            base units, working out to 0.6 and 1.0 STRK in this example.
-            Specific prices and deadlines belong in your agent policy, while
-            this walkthrough illustrates the lifecycle flow.
+            The payer&rsquo;s <code>balance</code> command checks its shielded
+            notes before the offer. Through MCP, use{" "}
+            <code>get_note_balance</code>. Values are expressed in base units,
+            working out to 0.6 and 1.0 STRK in this example. Your agent chooses
+            the prices and deadlines.
           </p>
           <p className="prose mt-4 max-w-[62ch]">
-            Every write takes an <code>operation_id</code>. Persist both the ID
-            and its associated intent prior to execution.
+            Every write takes an <code>operation_id</code>. Save the ID and
+            request before the call. The helper scripts record these in the
+            identity state directory.
           </p>
         </DocSection>
 
         <DocSection id="settle" n="03" title="Settle">
           <p className="prose max-w-[62ch]">
             Only the payer settles. <code>accept_and_settle</code> spends the
-            caller&rsquo;s notes, so a payee just leaves its final offer sitting
-            there for the payer to accept.
+            caller&rsquo;s notes, so the payee waits for the payer to accept its
+            final offer.
           </p>
           <div className="mt-5">
             <Snippet command={WALK_SETTLE} label="settle" accent />
@@ -123,8 +127,9 @@ export default function Walkthrough() {
             ))}
           </div>
           <p className="prose mt-6 max-w-[62ch]">
-            Transactions take 1-4 minutes to execute, with proof generation
-            accounting for most of that time.
+            Proof generation and provider response times can keep a transaction
+            pending for minutes. Use the recovery steps below if the result is
+            uncertain.
           </p>
         </DocSection>
 
@@ -136,50 +141,55 @@ export default function Walkthrough() {
             Neither one touches the chain, so neither costs gas.
           </p>
           <p className="prose mt-4 max-w-[62ch]">
-            A viewing grant enforces four key properties: it is restricted to a
-            single deal, includes an explicit expiry, carries no spending
-            authority, and requires a matching recipient pool key. Because
-            disclosures are non-revocable once shared, issuing a new grant
-            cannot alter or erase previously disclosed state.
+            Use the MCP request examples in{" "}
+            <a className="link" href="/tools#examples">
+              the tool reference
+            </a>
+            . Replace the example handles and IDs with values from your session.
+            Choose a registered recipient, a future expiry, and a new output
+            path. Open the file with <code>reveal</code> in that
+            recipient&rsquo;s session. A grant gives no spending authority.
+            Expiry cannot erase data the recipient already read.
           </p>
           <p className="prose mt-4 max-w-[62ch]">
-            To verify these privacy boundaries, run the observer script against
-            the public chain record as a negative control. The script recovers
-            zero payload data from the current wire format, while confirming
-            that channel relationships and transaction timestamps remain public
-            metadata.
+            For a local observer example, run{" "}
+            <code>
+              python3 scripts/observer.py scripts/fixtures/observer-wire-v3.json
+            </code>
+            . This fixture check does not inspect your transaction or prove
+            privacy against every observer. The script also accepts a Sepolia
+            transaction hash. Compare its output with the authorized reveal.
+            Counterparty addresses and transaction timing remain public.
           </p>
         </DocSection>
 
         <DocSection id="recover" n="05" title="When a write looks stuck">
           <p className="prose max-w-[62ch]">
-            Recovery here is explicit, you drive it, nothing happens
-            automatically. Never generate a new <code>operation_id</code> for
-            a stuck write, as doing so risks duplicate execution and double
-            payment.
+            You must start recovery explicitly. Never generate a new{" "}
+            <code>operation_id</code> for a stuck write, as doing so risks
+            duplicate execution and double payment.
           </p>
           <p className="prose mt-4 max-w-[62ch]">
             Follow this sequence to resolve a stalled transaction:
           </p>
           <ol className="mt-5 max-w-[62ch] list-disc space-y-3 pl-5">
             <li className="prose m-0">
-              Call <code>reconcile</code> first to inspect state. This
-              operation is strictly read-only and submits no transactions.
+              Call <code>reconcile</code> first to inspect state. It submits no
+              transactions.
             </li>
             <li className="prose m-0">
-              Call <code>resume_operation</code> retaining the original{" "}
-              <strong>operation_id</strong> only when the classification
-              indicates the operation is resumable.
+              If the classification permits resumption, call{" "}
+              <code>resume_operation</code> with the original{" "}
+              <strong>operation_id</strong>.
             </li>
             <li className="prose m-0">
-              Rebuild the proof under the same <strong>operation_id</strong> if
-              the result indicates an expired proof and the local journal
-              permits it.
+              If the proof expired, use <code>resume_operation</code> to rebuild
+              it only when the journal permits recovery. Keep the same{" "}
+              <strong>operation_id</strong>.
             </li>
           </ol>
           <p className="prose mt-6 max-w-[62ch]">
-            For clean-environment setup guides, faucet paths, and logging
-            standards, refer to{" "}
+            For further setup and recovery instructions, read{" "}
             <a href={doc("docs/runbook.md")} className="link">
               runbook.md ↗
             </a>

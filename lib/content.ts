@@ -1,5 +1,5 @@
 /**
- * Every value here is sourced from a document in this repository. Nothing is invented.
+ * Content adapted from the main Erebus repository. See each section for its source.
  *
  *   docs/status.md ................... the tiebreaker for current state
  *   docs/privacy-model.md ............ the only source for privacy claims
@@ -18,7 +18,7 @@ export const starkscan = (h: string) => `https://starkscan.co/tx/${h}`;
 /* ── System map · README.md, docs/assets/erebus-overview.excalidraw.svg ──── */
 
 export const SYSTEM_MAP_ALT =
-  "Erebus system overview: the stack from agent to pool, the three layers, a deal end to end, how an offer becomes five notes, the note frames, who sees what, and what the system does and does not claim";
+  "Erebus system overview: the agent-to-pool call path, wire-v3 messages, settlement checks, disclosure, and key exposure";
 
 /* ── Install · README.md ─────────────────────────────────────────────────── */
 
@@ -181,7 +181,7 @@ export type NonClaim = { title: string; body: string };
 export const NON_CLAIMS: NonClaim[] = [
   {
     title: "Not production ready",
-    body: "Two mainnet workflows passed. That is not capacity, uptime, or an independent security review.",
+    body: "Four recorded mainnet workflows passed. That is not capacity, uptime, or an independent security review.",
   },
   {
     title: "Disclosure cannot be undone",
@@ -243,19 +243,23 @@ export const ENV_VARS = [
   {
     k: "EREBUS_BACKEND",
     v: "mock · seam",
-    note: "mock drives the whole surface with no chain",
+    note: "mock runs the tools in memory without a chain",
   },
   { k: "EREBUS_NETWORK", v: "sepolia · mainnet", note: "" },
   {
     k: "EREBUS_SETTLEMENT_ROLE",
     v: "payer · payee · both",
-    note: "a payee server structurally refuses accept_and_settle",
+    note: "a payee server rejects accept_and_settle",
   },
   { k: "AGENT_ADDRESS", v: "0x…", note: "the calling account" },
   { k: "STARKNET_RPC_URL", v: "https://…", note: "" },
   { k: "PROVING_SERVICE_URL", v: "https://…", note: "hosted prover" },
   { k: "TOKEN_ADDRESS", v: "0x…", note: "the shielded token" },
-  { k: "POOL_KEY_FILE", v: "path", note: "key values never cross the binding" },
+  {
+    k: "POOL_KEY_FILE",
+    v: "path",
+    note: "the Python binding passes paths, not key values",
+  },
   { k: "ACCOUNT_KEY_FILE", v: "path", note: "" },
   { k: "EREBUS_STATE_DIR", v: "path", note: "locked, mode-0600 state" },
   {
@@ -263,7 +267,11 @@ export const ENV_VARS = [
     v: "JSON, optional",
     note: "per-token cap on what accept_and_settle can spend",
   },
-  { k: "POOL_ADDRESS", v: "0x…, optional", note: "overrides the default pool for the seam backend" },
+  {
+    k: "POOL_ADDRESS",
+    v: "0x…, optional",
+    note: "overrides the default pool for the seam backend",
+  },
   {
     k: "STARKNET_CHAIN_ID",
     v: "optional",
@@ -286,27 +294,27 @@ export const CALL_PATH = [
 export const CONCEPTS = [
   {
     term: "channel",
-    def: "The encrypted pair between two agents, returned as a `channel_handle` by `open_channel`. Once opened, a single channel can carry multiple deals. Note that while message payloads are encrypted, the handle itself is public. (See F38)",
+    def: "An encrypted conversation between two agents. Each side calls `open_channel` and receives its own `channel_handle`. The pair can carry multiple deals. Channel opening exposes the counterparty address in public calldata.",
   },
   {
     term: "offer",
-    def: "A proposed price submitted via `propose_offer` or updated via `counter_offer`. Offers cannot be manually withdrawn; they remain valid until accepted or expired. Setting a short expiration deadline is the primary mechanism to bound pricing exposure.",
+    def: "Proposed payment terms: amount, token, deadline, and memo hash. Use `propose_offer` for a new offer and `counter_offer` to reply. A counteroffer does not cancel the original. Offers cannot be withdrawn, so choose a deadline that limits how long the price remains available.",
   },
   {
     term: "deal",
-    def: "An accepted offer identified by a unique `deal_id`. A single channel can multiplex multiple deals, and settling one deal does not close the channel.",
+    def: "A negotiation identified by a `deal_id`, including its offers and any settlement. One channel pair can carry multiple deals. Settlement does not close the pair.",
   },
   {
     term: "note",
-    def: "A shielded unit of value within the STRK20 pool. Because `accept_and_settle` consumes the caller's notes, execution is restricted exclusively to the paying agent.",
+    def: "A record in the STRK20 pool. Value notes hold shielded tokens; zero-amount notes carry encrypted messages. Only the payer can call `accept_and_settle`, because it spends the caller's notes.",
   },
   {
     term: "operation_id",
-    def: "The idempotency key required for every write operation, formatted as `op_` followed by 64 lowercase hexadecimal characters. Persist this ID prior to invocation and reuse it across client restarts. If a transaction appears stuck, call `reconcile` rather than generating a new ID.",
+    def: "The idempotency key required for every write operation, formatted as `op_` followed by 64 lowercase hexadecimal characters. Save this ID before the call and reuse it after a restart. If a transaction appears stuck, call `reconcile` rather than generating a new ID.",
   },
   {
     term: "viewing grant",
-    def: "A file generated by `grant_viewing_key` that provides selective read disclosure for a single deal to a designated recipient. The `reveal` function reconstructs the deal state from the grant, requiring the local pool key to match the recipient named in the grant file.",
+    def: "A file that lets a named recipient read one deal. `grant_viewing_key` creates it with an expiry. `reveal` opens it with the recipient's pool key and reconstructs the deal. A grant gives no spending authority.",
   },
 ] as const;
 
@@ -352,7 +360,7 @@ export const TOOL_DETAILS: Record<
  "result": {"offer_id": "ch_9f8106a8...29c6d12ac:us:0"},
  "operation_id": "op_5a11...09dc"}`,
     detail:
-      "This example illustrates a payee session, as clients cannot counter their own proposals. Replying across channel directions is required; attempting a self-counter returns a `NOT_YOUR_OFFER` error. The `reply_to` field references the counterparty's offer (`them:n`), and the returned response yields the caller's newly created offer identifier (`us:n`).",
+      "This example runs on the payee. `reply_to` names the other party's offer (`them:n`). The response names the new counteroffer (`us:n`). Countering your own offer returns `NOT_YOUR_OFFER`.",
   },
   wait_for_offers: {
     signature: "(channel_handle, expected_count, timeout_seconds=300)",
@@ -372,7 +380,7 @@ export const TOOL_DETAILS: Record<
        "deadline": 1768003600, "memo_hash": "0x9f2cab01..."}}],
    "settlements": [], "timed_out": false}}`,
     detail:
-      "The `expected_count` parameter counts total offers stored in the channel rather than unread messages. For example, a payer that has submitted an initial proposal sets `expected_count` to 2 to await a counteroffer. Countering an offer transitions its status to `countered` without invalidating it; the original offer remains acceptable until settlement or expiration.",
+      "`expected_count` counts all offers in the channel, including those already read. After the first proposal, set it to 2 to wait for a counteroffer. A counteroffer changes the original status to `countered` but does not cancel it. The original remains available until settlement or expiry.",
   },
   read_channel_state: {
     signature: "(channel_handle)",
@@ -440,12 +448,12 @@ export const TOOL_DETAILS: Record<
   },
   resume_operation: {
     signature: "(operation_id)",
-    note: "Resumes a pending operation or identifies required manual remediation.",
+    note: "Resumes an operation or reports what you need to fix.",
     request: `{"operation_id": "op_c810...6f3e"}`,
     response: `{"ok": true, "backend": "seam", "network": "sepolia",
  "result": {"result": "already_complete", "transaction_hash": "0x79167f21...f97a"}}`,
     detail:
-      "The example response demonstrates the `already_complete` outcome. The nested `result.result` status field evaluates to one of: `already_complete`, `local_state_behind`, `resubmitted`, `recovered_proof`, `rebuilt`, `rebuild_required`, or `reconciliation_required`. Accompanying response fields vary by status; for instance, `rebuild_required` returns a `reason` string instead of a `transaction_hash`.",
+      "This example returns `already_complete`. The `result.result` field can contain: `already_complete`, `local_state_behind`, `resubmitted`, `recovered_proof`, `rebuilt`, `rebuild_required`, or `reconciliation_required`. Other fields depend on the status. For example, `rebuild_required` returns a `reason` string instead of a `transaction_hash`.",
   },
   rebuild_state: {
     signature: "()",
@@ -457,7 +465,7 @@ export const TOOL_DETAILS: Record<
   },
   doctor: {
     signature: "()",
-    note: "Executes pre-flight system, RPC, and prover health checks.",
+    note: "Checks local setup, RPC access, and prover access.",
     request: `{}`,
     response: `{"ok": true, "backend": "seam", "network": "sepolia",
  "result": {"ready": true,
@@ -489,7 +497,7 @@ export const ERROR_GROUPS = [
       "INDEX_CONFLICT",
     ],
     action:
-      "Construct a new offer; retrying the same request will not succeed.",
+      "Read the error message before another write. An expired offer needs new terms; insufficient notes need funding. If the deal is already settled, inspect its record instead of paying again.",
   },
   {
     group: "Funding or identity policy",
@@ -511,7 +519,7 @@ export const ERROR_GROUPS = [
       "SUBMIT_FAILED",
     ],
     action:
-      "Retry with exponential backoff. PROOF_EXPIRED requires generating a new proof; resubmitting the existing one will not succeed.",
+      "For reads, use the retryable flag and exponential backoff. For writes, call reconcile first and keep the original operation_id. If the journal permits recovery, resume_operation can submit again or rebuild an expired proof.",
   },
   {
     group: "Terminal",
@@ -535,7 +543,7 @@ export const ERROR_GROUPS = [
 /* ── Version · docs/reference.md, docs/status.md ─────────────────────────── */
 
 export const VERSION_NOTE =
-  "This page documents CLI Protocol 5 (v0.3.0), which exposes the thirteen tools listed above. Protocol 5 introduces installed account onboarding (erebus-init) while retaining Protocol 4's operation_id mechanics for settlement requests. Version v0.2.0 implements Protocol 4, while v0.1.0 implements Protocol 2 with ten tools. To prevent downstream schema errors, erebus-sdk validates protocol compatibility by protocol number prior to execution.";
+  "This page documents CLI Protocol 5 (v0.3.0), which exposes the thirteen tools listed above. Protocol 5 adds account setup through the installed package (erebus-init) while retaining Protocol 4's operation_id mechanics for settlement requests. Version v0.2.0 implements Protocol 4, while v0.1.0 implements Protocol 2 with ten tools. To detect incompatible request and response formats, erebus-sdk validates protocol compatibility by protocol number before each call.";
 
 export const VERSION_BADGE = "Protocol 5 · v0.3.0";
 
@@ -546,19 +554,19 @@ export const IDENTITY_BOOTSTRAP = `erebus-init`;
 export const IDENTITY_KEYS = [
   {
     key: "Starknet account key",
-    purpose: "Signs transactions. Custody",
+    purpose: "Signs transactions. Transaction signing",
     seenBy: "Never leaves the Rust process",
   },
   {
     key: "Pool private key",
-    purpose: "The STRK20 identity. Confidentiality",
+    purpose: "Identifies and decrypts pool records",
     seenBy:
       "Sent in compile_actions calldata to your prover and preflight RPC, both of which must be operator-controlled",
   },
   {
     key: "Pool auditor key",
     purpose: "Pool-wide, set once at registration",
-    seenBy: "StarkWare's, no rotation",
+    seenBy: "Receives the encrypted pool key at registration",
   },
 ] as const;
 
@@ -574,9 +582,9 @@ export const CLI_METHODS =
 
 export const BUILD_CLONE = `git clone https://github.com/PoulavBhowmick03/Erebus && cd Erebus`;
 
-export const BUILD_RUST = `cd sdk/rs && cargo test --all-targets && cd ../.. # 351 passed, 2 ignored`;
+export const BUILD_RUST = `cargo test --manifest-path sdk/rs/Cargo.toml --all-targets`;
 
-export const BUILD_PYTHON = `uv sync --all-packages && uv run pytest          # 154 tests`;
+export const BUILD_PYTHON = `uv sync --all-packages && uv run pytest`;
 
 /* ── How it works · sdk/rs/src/wire.rs module docs, docs/status.md ───────── */
 
@@ -594,7 +602,7 @@ export const WIRE_FIELDS = [
   },
 ] as const;
 
-/** The three cryptographic jobs. Only the third requires a proof. */
+/** The mechanisms used for messages, authorization, and pool settlement. */
 export const CRYPTO_JOBS = [
   {
     job: "Negotiation confidentiality",
@@ -603,13 +611,13 @@ export const CRYPTO_JOBS = [
   },
   {
     job: "Agreement authorization",
-    mechanism: "Signatures, or a proof when signer identity must stay hidden",
-    proof: "Only to hide the signer",
+    mechanism: "Client checks and pool spending authority",
+    proof: "No proof of agreed-price equality",
   },
   {
     job: "Private settlement",
-    mechanism: "The pool's privacy mechanism",
-    proof: "Yes, for the shielded guarantee",
+    mechanism: "STRK20 proof and atomic pool actions",
+    proof: "Required for pool writes",
   },
 ] as const;
 
@@ -647,8 +655,9 @@ export const LEAK_STEPS = [
   },
   {
     step: "6-7 · grant and reveal",
-    hidden: "everything. Local only, no transaction.",
-    open: "nothing",
+    hidden:
+      "deal data remains encrypted on chain; the named recipient can read the disclosed deal",
+    open: "no new transaction; local files and provider requests can leave records",
   },
 ] as const;
 
@@ -726,18 +735,18 @@ export const NOT_DOES = [
   },
   {
     title: "Escrow, or deferred delivery",
-    body: 'Settlement is atomic, so there is no *"agree-now, deliver-later"* model. The pool has no timelock and no conditional release, and neither can be added on the client side.',
+    body: "The pool transfers funds at settlement. It cannot hold funds until a later delivery or release them under an external condition.",
   },
 ] as const;
 
 export const PROD_GAPS = [
   {
-    area: "Custody and infrastructure",
+    area: "Transaction signing and infrastructure",
     body: "The prover and preflight RPC receive the pool private key, so a hosted provider sits inside the identity's confidentiality boundary. Getting to production needs a written provider policy, endpoint rotation and revocation, a supported self-hosted fallback, tested backup and restore, and a key-loss drill.",
   },
   {
     area: "Transaction safety",
-    body: "Protocol 4 has durable operation ids and reconciliation, but production still needs long-running failure tests against real provider timeouts, journal pruning that preserves recovery evidence, spending limits enforced in Rust across restarts, and operator alerts when an operation goes ambiguous.",
+    body: "The client records operation IDs and supports reconciliation. Further work includes long-running failure tests against real provider timeouts, journal pruning that preserves recovery evidence, spending limits enforced in Rust across restarts, and operator alerts when the transaction outcome is uncertain.",
   },
   {
     area: "Security review",
@@ -777,7 +786,24 @@ export const WALK_SETTLE = `# A reads B's counter through A's direction and sett
 scripts/agent.sh ~/.erebus-a/env status "$HANDLE_A"
 scripts/agent.sh ~/.erebus-a/env accept "$HANDLE_A" them:0`;
 
-export const WALK_SHIELD = `python3 "$REQ" "$ENV" shield '{"amount":"1000000000000000000"}' | "$CLI"`;
+export const WALK_SETUP = `git clone https://github.com/PoulavBhowmick03/Erebus
+cd Erebus
+cargo build --manifest-path sdk/rs/Cargo.toml --bin erebus-cli
+
+# Choose separate accounts and provide Sepolia RPC and prover endpoints.
+erebus-init --network sepolia --role payer --config ~/.erebus-a/env --deposit 1 --writes 3
+erebus-init --network sepolia --role payee --config ~/.erebus-b/env --deposit 1 --writes 2
+
+# The shell helpers need explicit Sepolia values in each env file.
+for erebus_env in ~/.erebus-a/env ~/.erebus-b/env; do
+  cat >> "$erebus_env" <<'EOF'
+STARKNET_CHAIN_ID=0x534e5f5345504f4c4941
+POOL_ADDRESS=0x0254a6b2997ef52e9f830ce1f543f6b29768295e8d17e2267d672c552cfe0d91
+EOF
+done
+
+scripts/agent.sh ~/.erebus-a/env doctor
+scripts/agent.sh ~/.erebus-b/env doctor`;
 
 export const SETTLE_RESULT = [
   "tx_hash",
@@ -891,7 +917,7 @@ const KEYWORD_INDEX = [
   {
     title: "EREBUS_BACKEND",
     href: "/#configure",
-    snippet: "mock or seam. mock drives the whole surface with no chain",
+    snippet: "mock or seam. mock runs the tools in memory without a chain",
   },
   {
     title: "channel, offer, deal",
@@ -986,7 +1012,7 @@ const KEYWORD_INDEX = [
   {
     title: "The CLI protocol",
     href: "/architecture#cli",
-    snippet: "erebus-cli, stdin/stdout JSON envelope, protocol 4",
+    snippet: "erebus-cli, stdin/stdout JSON envelope, protocol 5",
   },
   {
     title: "Build from source",

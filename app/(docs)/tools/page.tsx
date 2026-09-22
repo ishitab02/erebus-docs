@@ -7,16 +7,20 @@ import { TOOL_DETAILS, TOOL_GROUPS } from "@/lib/content";
 
 export const metadata: Metadata = {
   title: "Erebus docs · Call the tools",
-  description: "The thirteen MCP tools: signatures, notes, and the full negotiation sequence.",
+  description:
+    "The thirteen MCP tools: signatures, notes, and the full negotiation sequence.",
 };
 
 export default function Tools() {
   return (
     <>
       <Reveal className="max-w-[68ch]">
-        <h1 className="display mb-0 text-[clamp(28px,4.4vw,56px)]">Call the tools.</h1>
+        <h1 className="display mb-0 text-[clamp(28px,4.4vw,56px)]">
+          Call the tools.
+        </h1>
         <p className="lead mt-6 max-w-[56ch]">
-          CLI Protocol 5 specification covering thirteen MCP tools.
+          The thirteen MCP tools, with arguments and example responses. The
+          server uses CLI Protocol 5.
         </p>
       </Reveal>
 
@@ -33,8 +37,12 @@ export default function Tools() {
                       className="grid grid-cols-1 gap-x-8 gap-y-1 xl:grid-cols-[11rem_19rem_1fr]"
                     >
                       <span className="mono-sm text-fore">{t}</span>
-                      <span className="mono-xs tnum text-fore-3">{TOOL_DETAILS[t]?.signature}</span>
-                      <span className="mono-xs text-fore-3">{TOOL_DETAILS[t]?.note}</span>
+                      <span className="mono-xs tnum text-fore-3">
+                        {TOOL_DETAILS[t]?.signature}
+                      </span>
+                      <span className="mono-xs text-fore-3">
+                        {TOOL_DETAILS[t]?.note}
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -42,15 +50,16 @@ export default function Tools() {
             ))}
           </div>
           <p className="prose mt-5 max-w-[62ch]">
-            A standard negotiation lifecycle consists of <code>open_channel</code>,{" "}
-            <code>propose_offer</code>, <code>wait_for_offers</code>, <code>counter_offer</code>,
-            and <code>accept_and_settle</code>, followed by <code>grant_viewing_key</code> and{" "}
-            <code>reveal</code> for post-settlement disclosure.
+            A negotiation uses <code>open_channel</code>,{" "}
+            <code>propose_offer</code>, <code>wait_for_offers</code>,{" "}
+            <code>counter_offer</code>, and <code>accept_and_settle</code>,
+            followed by <code>grant_viewing_key</code> and <code>reveal</code>{" "}
+            to disclose the settled deal.
           </p>
           <p className="prose mt-4 max-w-[62ch]">
-            Every write operation requires an <code>operation_id</code>. Persist both the ID and
-            the operation intent prior to invocation, and reuse the same ID across system
-            restarts. More on this under{" "}
+            Every write operation requires an <code>operation_id</code>. Save
+            the ID and request before the call. Reuse that ID after a restart.
+            More on this under{" "}
             <a href="/concepts#concepts" className="link">
               core concepts
             </a>
@@ -58,30 +67,35 @@ export default function Tools() {
           </p>
           <p className="prose mt-4 max-w-[62ch]">
             This page documents <strong>CLI Protocol 5</strong> (
-            <strong>v0.3.0</strong>), which exposes the thirteen tools listed above. Protocol 5
-            introduces installed account onboarding (<code>erebus-init</code>) while retaining
-            Protocol 4&rsquo;s <code>operation_id</code> mechanics for settlement requests.
-            Version <strong>v0.2.0</strong> implements <strong>Protocol 4</strong>, while{" "}
-            <strong>v0.1.0</strong> implements <strong>Protocol 2</strong> with ten tools. To
-            prevent downstream schema errors, <code>erebus-sdk</code> validates protocol
-            compatibility by protocol number prior to execution.
+            <strong>v0.3.0</strong>), which exposes the thirteen tools listed
+            above. Protocol 5 adds account setup through the installed package (
+            <code>erebus-init</code>) while retaining Protocol 4&rsquo;s{" "}
+            <code>operation_id</code> mechanics for settlement requests. Version{" "}
+            <strong>v0.2.0</strong> implements <strong>Protocol 4</strong>,
+            while <strong>v0.1.0</strong> implements <strong>Protocol 2</strong>{" "}
+            with ten tools. To detect incompatible request and response formats,{" "}
+            <code>erebus-sdk</code> validates protocol compatibility by protocol
+            number before each call.
           </p>
         </DocSection>
 
         <DocSection id="examples" n="02" title="Request and response, per tool">
           <p className="prose max-w-[62ch]">
             All responses use the standard envelope{" "}
-            <code>{"{ok, backend, network, result | error}"}</code>. Write operations include the{" "}
-            <code>operation_id</code> supplied in the request. In the examples below,{" "}
-            <code>{'{"...": "..."}'}</code> indicates fields truncated for readability.
+            <code>{"{ok, backend, network, result | error}"}</code>. Write
+            operations include the <code>operation_id</code> supplied in the
+            request. In the examples below, <code>{'{"...": "..."}'}</code>{" "}
+            indicates fields truncated for readability.
           </p>
           <p className="prose mt-4 max-w-[62ch]">
-            An <code>offer_id</code> uses the format <code>{"<channel>:us:<n>"}</code> or{" "}
-            <code>{"<channel>:them:<n>"}</code>, where <code>us</code> and <code>them</code> are
-            relative to the caller. A single offer appears as <code>us:0</code> to its proposer
-            and <code>them:0</code> to the recipient; consequently, an ID copied directly from a
-            counterparty&rsquo;s transcript will not resolve locally. Unless noted otherwise,
-            example payloads represent a single payer session.
+            An <code>offer_id</code> uses the format{" "}
+            <code>{"<channel>:us:<n>"}</code> or{" "}
+            <code>{"<channel>:them:<n>"}</code>, where <code>us</code> and{" "}
+            <code>them</code> are relative to the caller. A single offer appears
+            as <code>us:0</code> to its proposer and <code>them:0</code> to the
+            recipient; an ID copied from the counterparty&rsquo;s transcript
+            refers to the wrong direction in your session. Unless noted
+            otherwise, example payloads represent a single payer session.
           </p>
           <div className="mt-8 space-y-10 border-t border-rule pt-8">
             {TOOL_GROUPS.flatMap((g) => g.tools).map((t) => {
@@ -95,7 +109,11 @@ export default function Tools() {
                       <p className="mono-xs mb-2 uppercase tracking-[0.14em] text-fore-3">
                         Request
                       </p>
-                      <Snippet command={d.request} label={`${t}-request`} accent />
+                      <Snippet
+                        command={d.request}
+                        label={`${t}-request`}
+                        accent
+                      />
                     </div>
                     <div>
                       <p className="mono-xs mb-2 uppercase tracking-[0.14em] text-fore-3">

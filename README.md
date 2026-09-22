@@ -9,17 +9,17 @@ Quickstart, not `/docs`.
 
 ## Routes
 
-| path | page |
-|---|---|
-| `/` | Quickstart |
-| `/how-it-works` | How it works |
-| `/concepts` | Core concepts |
-| `/walkthrough` | Walkthrough |
-| `/tools` | Call the tools |
-| `/errors` | Responses and errors |
-| `/privacy` | Privacy model |
-| `/limits` | Limits |
-| `/architecture` | Architecture |
+| path            | page                 |
+| --------------- | -------------------- |
+| `/`             | Quickstart           |
+| `/how-it-works` | How it works         |
+| `/concepts`     | Core concepts        |
+| `/walkthrough`  | Walkthrough          |
+| `/tools`        | Call the tools       |
+| `/errors`       | Responses and errors |
+| `/privacy`      | Privacy model        |
+| `/limits`       | Limits               |
+| `/architecture` | Architecture         |
 
 ## Develop
 
@@ -45,6 +45,10 @@ the domain is added to the project.
 
 ## Content
 
-`lib/content.ts` is the site's content source; every value names the repo document it came
-from. `docs/*.md` in the main `Erebus` repo remains the written source of truth, and the
-footer links there. If a fact changes, change it in the main repo first, then here.
+Page text lives in `app/(docs)`, with shared definitions and examples in `lib/content.ts`.
+The architecture diagram is `public/erebus-overview.svg`. The social preview is `public/og.png`.
+
+Technical wording follows the `main` branch of the main `Erebus` repository.
+This review used commit `27ced71` for Protocol 5 and wire v3. Check source code when
+older upstream documents disagree with the current release. Keep the diagram and search
+snippets consistent with page text when behavior changes.

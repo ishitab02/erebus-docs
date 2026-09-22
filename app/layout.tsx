@@ -6,14 +6,7 @@ import { Grain } from "@/components/Grain";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
-// Three faces doing three different jobs, not one grotesque stretched to
-// cover headline, body, and data. A single family everywhere is exactly what
-// makes a page read as templated: there's no contrast in the type itself for
-// the eye to register as "someone chose this." Anton is a poster face —
-// ultra-heavy, condensed, built to be shouted at headline size, not a
-// slightly-bolder version of a body font. Space Grotesk carries the actual
-// sentences, where a poster face would be unreadable. JetBrains Mono stays
-// for data and labels.
+// Display headings, body text, and code use separate font families.
 const display = Anton({
   subsets: ["latin"],
   weight: ["400"],
@@ -39,19 +32,19 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://docs.erebusagents.live"),
   title: "Erebus docs",
   description:
-    "Install the Erebus MCP server, configure an identity, and drive a shielded settlement from any agent framework.",
+    "Private settlement and negotiation infrastructure for AI agents.",
   openGraph: {
     title: "Erebus docs",
     description:
-      "Private coordination and shielded settlement for AI agents on Starknet.",
+      "Private settlement and negotiation infrastructure for AI agents.",
     type: "website",
     url: "/",
     siteName: "Erebus",
     images: [
       {
         url: "/og.png",
-        width: 1200,
-        height: 630,
+        width: 1731,
+        height: 909,
         alt: "Erebus",
       },
     ],
@@ -60,7 +53,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Erebus docs",
     description:
-      "Private coordination and shielded settlement for AI agents on Starknet.",
+      "Private settlement and negotiation infrastructure for AI agents.",
     images: ["/og.png"],
   },
 };
@@ -74,8 +67,7 @@ export const viewport: Viewport = {
 /**
  * The document ships unkeyed. Every value is still plaintext in the markup —
  * the redaction is an ink bar drawn over it — so a reader with no JavaScript,
- * a crawler, or a link preview sees the complete page. The reveal is theatre
- * layered on top of readable content, never a substitute for it.
+ * a crawler, or a link preview sees the complete page. The animation does not hide content from the document.
  */
 const BOOT = `
 try {
@@ -86,7 +78,11 @@ try {
 }
 `.trim();
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html
       lang="en"

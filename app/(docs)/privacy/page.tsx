@@ -24,9 +24,12 @@ export default function Privacy() {
   return (
     <>
       <Reveal className="max-w-[68ch]">
-        <h1 className="display mb-0 text-[clamp(28px,4.4vw,56px)]">Privacy model.</h1>
+        <h1 className="display mb-0 text-[clamp(28px,4.4vw,56px)]">
+          Privacy model.
+        </h1>
         <p className="lead mt-6 max-w-[56ch]">
-          Documents what is actually hidden, what is not, and where the edges are.
+          Message contents are encrypted. Counterparty addresses, submitting
+          accounts, note counts, and transaction timing remain public.
         </p>
       </Reveal>
 
@@ -47,9 +50,9 @@ export default function Privacy() {
             {PRIVACY_ONE_LINE}
           </p>
           <p className="prose mt-6 max-w-[62ch]">
-            Erebus provides payload confidentiality rather than absolute privacy. If your threat
-            model requires concealing that two parties transacted at all, Erebus does not support
-            that requirement.
+            Erebus provides payload confidentiality rather than absolute
+            privacy. If your threat model requires concealing that two parties
+            transacted at all, Erebus does not support that requirement.
           </p>
         </DocSection>
 
@@ -62,27 +65,31 @@ export default function Privacy() {
               >
                 <dt className="mono-sm text-fore">{s.step}</dt>
                 <dd className="mono-xs m-0 text-fore-2">
-                  <span className="label m-0 mb-1 block !text-fore-3">Hidden</span>
+                  <span className="label m-0 mb-1 block !text-fore-3">
+                    Hidden
+                  </span>
                   {s.hidden}
                 </dd>
                 <dd className="mono-xs m-0 text-fore-3">
-                  <span className="label m-0 mb-1 block !text-fore-3">Public</span>
+                  <span className="label m-0 mb-1 block !text-fore-3">
+                    Public
+                  </span>
                   {s.open}
                 </dd>
               </div>
             ))}
           </dl>
           <p className="prose mt-6 max-w-[62ch]">
-            Granting and revealing produce zero chain activity. Disclosure is just a local read
-            against data that is already on chain, which is why a grant costs no gas and leaves
-            no trace behind.
+            Creating or opening a grant submits no transaction and costs no gas.
+            Grant files, local logs, and requests to data providers can still
+            leave records.
           </p>
         </DocSection>
 
         <DocSection id="leaks" n="03" title="The known leaks">
           <p className="prose max-w-[62ch]">
-            Listed in descending order of severity. Each one is either something we measured in
-            this repository or something you can see directly in the upstream contract source.
+            These leaks follow from the pool contract and the recorded observer
+            tests. The linked privacy model includes the source references.
           </p>
           <div className="mt-8 space-y-10">
             {KNOWN_LEAKS.map((l) => (
@@ -102,11 +109,16 @@ export default function Privacy() {
           </div>
         </DocSection>
 
-        <DocSection id="infra" n="04" title="Infrastructure sees more than the chain">
+        <DocSection
+          id="infra"
+          n="04"
+          title="Infrastructure sees more than the chain"
+        >
           <p className="prose max-w-[62ch]">
-            The chain is not the only observer. The pool is an account contract simulated
-            locally, so the compiled action set embeds the pool private key directly in its
-            calldata. Two endpoints receive that calldata.
+            The chain is not the only observer. The pool is an account contract
+            simulated locally, so the compiled action set embeds the pool
+            private key directly in its calldata. Two endpoints receive that
+            calldata.
           </p>
           <dl className="mt-6 border-t border-rule">
             {INFRA_VISIBILITY.map((e) => (
@@ -121,22 +133,22 @@ export default function Privacy() {
             ))}
           </dl>
           <p className="prose mt-6 max-w-[62ch]">
-            Both can therefore reconstruct that identity&rsquo;s full history. The exposure
-            aggregates across users on a shared prover, and it is permanent: there is no rotation
-            and no revocation. Using a hosted prover means trusting that provider with your
-            private data. Running your own prover removes that provider, but then you have to
-            handle the node, storage, screening, and uptime work yourself.
+            Both can therefore reconstruct that identity&rsquo;s full history.
+            The exposure aggregates across users on a shared prover, and it is
+            permanent: there is no rotation and no revocation. Using a hosted
+            prover means trusting that provider with your private data. Running
+            your own prover removes that provider, but then you have to handle
+            the node, storage, screening, and uptime work yourself.
           </p>
           <p className="prose mt-4 max-w-[62ch]">
-            The submitted transaction itself never includes the key, so this one part of the
-            design stays safe.
+            The submitted transaction does not include the pool private key.
           </p>
           <p className="prose mt-4 max-w-[62ch]">
-            Separately, registration writes your pool private key, encrypted, to one auditor key
-            that covers the whole pool. This is set once, it covers everything that identity ever
-            does, and you never get asked to approve it, it happens the moment you register.
-            There is no undoing it afterward. Use a separate, low-value identity for anything you
-            put on mainnet.
+            Separately, registration writes your pool private key, encrypted, to
+            one auditor key that covers the whole pool. Registration makes this
+            disclosure for the identity&rsquo;s full pool history. There is no
+            separate consent step and no way to revoke it afterward. Use a
+            separate, low-value identity for anything you put on mainnet.
           </p>
         </DocSection>
 
@@ -150,9 +162,10 @@ export default function Privacy() {
             <InlineCode text={DISCLOSURE_ASSERTS} />
           </p>
           <p className="prose mt-8 max-w-[62ch]">
-            This atomicity guarantee is limited. The acceptance and the payment share one action
-            set, but the amount-equality check runs client-side. The STRK20 circuit does not
-            understand what a negotiation is, so it cannot prove that the negotiation and the
+            This atomicity guarantee is limited. The acceptance and the payment
+            share one action set, but the amount-equality check runs
+            client-side. The STRK20 circuit does not understand what a
+            negotiation is, so it cannot prove that the negotiation and the
             payment actually match.
           </p>
           <p className="prose mt-6 max-w-[62ch]">

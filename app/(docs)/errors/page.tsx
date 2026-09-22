@@ -6,25 +6,31 @@ import { ERROR_GROUPS, RESPONSE_ERR, RESPONSE_OK } from "@/lib/content";
 
 export const metadata: Metadata = {
   title: "Erebus docs · Responses and errors",
-  description: "The result envelope every tool returns, and what each error group means to do next.",
+  description:
+    "The result envelope every tool returns, and what each error group means to do next.",
 };
 
 export default function Errors() {
   return (
     <>
       <Reveal className="max-w-[68ch]">
-        <h1 className="display mb-0 text-[clamp(28px,4.4vw,56px)]">Responses and errors.</h1>
+        <h1 className="display mb-0 text-[clamp(28px,4.4vw,56px)]">
+          Responses and errors.
+        </h1>
         <p className="lead mt-6 max-w-[56ch]">
-          Defines response formatting, error categories, and retry handling.
+          Each tool returns a result or an error. The error includes a code, a
+          message, and a retry flag.
         </p>
       </Reveal>
 
       <div className="mt-16 md:mt-20">
         <DocSection id="responses" n="01" title="The envelope">
           <p className="prose max-w-[62ch]">
-            All responses use the same envelope format, whether a call succeeds or fails. Every
-            response includes <code>backend</code> (<code>mock</code> or <code>seam</code>) and{" "}
-            <code>network</code> metadata, so logs show whether and where the call ran on-chain.
+            All responses use the same envelope format, whether a call succeeds
+            or fails. Every response includes <code>backend</code> (
+            <code>mock</code> or <code>seam</code>) and <code>network</code>{" "}
+            metadata, so logs identify the selected backend and network. These
+            fields alone do not prove that a transaction reached the chain.
           </p>
           <div className="mt-6 space-y-3">
             <Snippet command={RESPONSE_OK} label="ok" />
@@ -32,10 +38,10 @@ export default function Errors() {
           </div>
 
           <p className="prose mt-8 max-w-[62ch]">
-            Categorize errors based on their error group rather than by individual code. Always
-            check the{" "}
-            <code>retryable</code> boolean field on the error object to determine if a call can be
-            retried. Do not guess retry behavior from the error code name.
+            Use the groups below to find the relevant recovery steps. Check the{" "}
+            <code>retryable</code> boolean field on the error object to
+            determine if a call can be retried. Do not guess retry behavior from
+            the error code name.
           </p>
           <div className="mt-6 border-t border-rule">
             {ERROR_GROUPS.map((e) => (
@@ -61,11 +67,12 @@ export default function Errors() {
             ))}
           </div>
           <p className="prose mt-6 max-w-[62ch]">
-            Write operations take 1-4 minutes due to proof generation, so a delay in this window
-            does not mean the call failed. Never create a new <code>operation_id</code> for a slow
-            write, as this risks duplicate transactions and double payment. Call{" "}
-            <code>reconcile</code> first to inspect state, then run <code>resume_operation</code>{" "}
-            with the original <code>operation_id</code> when permitted.
+            Proof generation can keep a write pending for minutes. A slow
+            response does not prove that the call failed. Never create a new{" "}
+            <code>operation_id</code> for a slow write, as this risks duplicate
+            transactions and double payment. Call <code>reconcile</code> first
+            to inspect state, then run <code>resume_operation</code> with the
+            original <code>operation_id</code> when permitted.
           </p>
         </DocSection>
       </div>
